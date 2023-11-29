@@ -19,6 +19,23 @@ class UserInfoSerializer(serializers.ModelSerializer):
         res = UserInfo.objects.create(contacts=user_info, **validated_data)
         return res
 
+    def update(self, instance, validated_data):
+        contacts_data = validated_data.pop('contacts')
+        contacts_serializer = ContactsSerializer(instance=instance.contacts, data=contacts_data)
+        if contacts_serializer.is_valid():
+            contacts_instance = contacts_serializer.save()
+            instance.full_name = validated_data.get('full_name', instance.full_name)
+            instance.citizenship = validated_data.get('citizenship', instance.citizenship)
+            instance.sex = validated_data.get('sex', instance.sex)
+            instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+            instance.native_language = validated_data.get('native_language', instance.native_language)
+            instance.other_languages_and_levels = validated_data.get('other_languages_and_levels', instance.other_languages_and_levels)
+            instance.contacts = contacts_instance
+            instance.save()
+            return instance
+        else:
+            raise serializers.ValidationError(contacts_serializer.errors)
+
 class UserInfoEditSerializer(serializers.ModelSerializer):
     user_info = UserInfoSerializer()
     class Meta:
@@ -31,7 +48,7 @@ class UserInfoEditSerializer(serializers.ModelSerializer):
         if user_info_serializer.is_valid():
             user_info_instance = user_info_serializer.save()
             instance.email = validated_data.get('email', instance.email)
-            instance.user_info = user_info_instance  # Присваиваем экземпляр user_info, который был сохранен
+            instance.user_info = user_info_instance
             instance.save()
             return instance
         else:
