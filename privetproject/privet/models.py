@@ -3,6 +3,23 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager, AbstractBa
 
 # Create your models here.
 
+class UserInfo(models.Model):
+    male = 'male'
+    female = 'female'
+    sex_choices = [
+        (male, 'male'),
+        (female, 'female'),
+    ]
+
+    full_name = models.CharField(max_length=255)
+    citizenship = models.CharField(max_length=255)
+    sex = models.CharField(max_length=255, choices=sex_choices)
+    birth_date = models.DateField()
+    native_language = models.CharField(max_length=255)
+    other_languages_and_levels = models.CharField(max_length=255)
+    contacts = models.ForeignKey('Contacts', on_delete=models.PROTECT, null=True)
+
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password, university, **extra_fields):
         if not email:
@@ -35,6 +52,7 @@ class User(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    user_info = models.ForeignKey(UserInfo, on_delete=models.PROTECT, null=True)
 
     objects = CustomUserManager()
 
@@ -49,3 +67,10 @@ class User(AbstractBaseUser):
 
     def has_perm(self, perm, obj=None):
         return True
+
+
+class Contacts(models.Model):
+    vk = models.CharField(max_length=255, blank=True)
+    phone = models.CharField(max_length=255, blank=True)
+    telegram = models.CharField(max_length=255, blank=True)
+    whatsapp = models.CharField(max_length=255, blank=True)
