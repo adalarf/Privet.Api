@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, AbstractBaseUser
+from django.db.models.signals import post_save
+from django.conf import settings
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
 # Create your models here.
 
@@ -12,7 +16,6 @@ class UserInfo(models.Model):
     ]
 
     full_name = models.CharField(max_length=255)
-    citizenship = models.CharField(max_length=255)
     sex = models.CharField(max_length=255, choices=sex_choices)
     birth_date = models.DateField()
     native_language = models.CharField(max_length=255)
@@ -52,6 +55,8 @@ class User(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    is_student = models.BooleanField(default=False)
+    is_buddy = models.BooleanField(default=False)
     user_info = models.ForeignKey(UserInfo, on_delete=models.PROTECT, null=True)
 
     objects = CustomUserManager()
@@ -61,6 +66,11 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+
+    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+    def create_auth_token(sender, instance=None, created=False, **kwargs):
+        if created:
+            Token.objects.create(user=instance)
 
     def has_module_perms(self, app_label):
         return True
@@ -74,3 +84,14 @@ class Contacts(models.Model):
     phone = models.CharField(max_length=255, blank=True)
     telegram = models.CharField(max_length=255, blank=True)
     whatsapp = models.CharField(max_length=255, blank=True)
+
+
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    citizenship = models.CharField(max_length=255)
+
+
+
+class Buddy(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    buddy_status = models.CharField(max_length=255)

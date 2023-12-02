@@ -20,7 +20,10 @@ from privet import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/auth/', include('djoser.urls')),
-    re_path(r'^auth/', include('djoser.urls.authtoken')),
-    path('api/v1/userinfo/<int:pk>/', views.UserInfoEditAPIView.as_view()),
+    path('api/v1/student/profile/<int:pk>/', views.StudentProfileView.as_view()),
+    path('api/v1/buddy/profile/<int:pk>/', views.BuddyProfileView.as_view()),
+    path('api/v1/signup/student/', views.StudentSignupView.as_view()),
+    path('api/v1/signup/buddy/', views.BuddySignupView.as_view()),
+    path('api/v1/login/', views.CustomAuthToken.as_view()),
+    path('api/v1/logout/', views.LogoutView.as_view()),
 ]
