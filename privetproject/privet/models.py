@@ -87,11 +87,11 @@ class Contacts(models.Model):
 
 
 class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     citizenship = models.CharField(max_length=255)
 
 
 
 class Buddy(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     buddy_status = models.CharField(max_length=255)
