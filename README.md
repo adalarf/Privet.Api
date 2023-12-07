@@ -1,4 +1,5 @@
 # Privet.Api
+Это API для https://github.com/K0ch3rga/Privet
 
 <b>'api/v1/student/profile/<int:pk>/'</b> – Страница профиля студента, где <int:pk> его id. Для доступа передается токен.<br>
  Для выполнения доступны GET, PUT, PATCH, DELETE, HEAD, OPTIONS запросы. Данные передаются в виде:<br>
