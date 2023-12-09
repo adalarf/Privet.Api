@@ -72,7 +72,7 @@ class StudentSerializer(serializers.ModelSerializer):
         user_info_serializer = UserSerializer(instance=instance.user, data=user_info_data)
         if user_info_serializer.is_valid():
             user_info_instance = user_info_serializer.save()
-            instance.citizenship = validated_data.get('citizenship', instance.buddy_status)
+            instance.citizenship = validated_data.get('citizenship', instance.citizenship)
             instance.user_info = user_info_instance
             instance.save()
             return instance
