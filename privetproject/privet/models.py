@@ -5,7 +5,7 @@ from django.conf import settings
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-# Create your models here.
+
 
 class UserInfo(models.Model):
     male = 'male'
@@ -86,12 +86,23 @@ class Contacts(models.Model):
     whatsapp = models.CharField(max_length=255, blank=True)
 
 
+class ArrivalBooking(models.Model):
+    arrival_date = models.DateField()
+    arrival_time = models.TimeField()
+    other_students = models.ManyToManyField('Student', related_name='other_students', blank=True)
+
+
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     citizenship = models.CharField(max_length=255)
+    arrival_booking = models.OneToOneField(ArrivalBooking, on_delete=models.PROTECT, null=True)
 
+
+class BuddyArrival(models.Model):
+    student = models.OneToOneField(Student, on_delete=models.PROTECT)
 
 
 class Buddy(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     buddy_status = models.CharField(max_length=255)
+    buddy_arrivals = models.ManyToManyField(BuddyArrival, related_name='buddy')

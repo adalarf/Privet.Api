@@ -26,4 +26,11 @@ urlpatterns = [
     path('api/v1/signup/buddy/', views.BuddySignupView.as_view()),
     path('api/v1/login/', views.CustomAuthToken.as_view()),
     path('api/v1/logout/', views.LogoutView.as_view()),
+
+    path('api/v1/student/arrival-booking/<int:pk>/', views.ArrivalBookingView.as_view()),
+    path('api/v1/student/arrival-booking/add-student/<int:pk>/', views.ArrivalOtherStudentView.as_view()),
+    path('api/v1/buddy/arrivals/', views.AllArrivalBookingsView.as_view()),
+    path('api/v1/buddy/arrivals/<int:pk>/', views.DefiniteArrivalBookingView.as_view()),
+    path('api/v1/buddy/add-arrival/', views.AddArrivalToBuddy.as_view()),
+    path('api/v1/buddy/buddy-arrivals/<int:user>/', views.BuddyArrivalsView.as_view()),
 ]

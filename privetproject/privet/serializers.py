@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, UserInfo, Contacts, Student, Buddy
+from .models import User, UserInfo, Contacts, Student, Buddy, ArrivalBooking, BuddyArrival
 
 
 class ContactsSerializer(serializers.ModelSerializer):
@@ -78,6 +78,75 @@ class StudentSerializer(serializers.ModelSerializer):
             return instance
         else:
             raise serializers.ValidationError(user_info_serializer.errors)
+
+
+class ArrivalBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArrivalBooking
+        fields = '__all__'
+
+
+class StudentArrivalBookingSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    arrival_booking = ArrivalBookingSerializer()
+    class Meta:
+        model = Student
+        fields = ('citizenship', 'user', 'arrival_booking')
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        arrival_booking_data = validated_data.pop('arrival_booking', None)
+        instance.citizenship = validated_data.get('citizenship', instance.citizenship)
+
+        if user_data:
+            user_serializer = UserSerializer(instance.user, data=user_data)
+            if user_serializer.is_valid():
+                user_serializer.save()
+
+        if arrival_booking_data:
+            arrival_booking_instance = instance.arrival_booking  # Получаем экземпляр ArrivalBooking
+            if arrival_booking_instance:
+                arrival_booking_serializer = ArrivalBookingSerializer(arrival_booking_instance,
+                                                                      data=arrival_booking_data)
+            else:
+                arrival_booking_serializer = ArrivalBookingSerializer(data=arrival_booking_data)
+            if arrival_booking_serializer.is_valid():
+                arrival_booking = arrival_booking_serializer.save()
+                instance.arrival_booking = arrival_booking  # Сохраняем созданный или обновленный экземпляр ArrivalBooking
+
+        instance.save()
+        return instance
+
+
+
+class StudentArrivalSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    arrival_booking = ArrivalBookingSerializer()
+    class Meta:
+        model = Student
+        fields = ('citizenship', 'user', 'arrival_booking')
+
+
+class BuddyArrivalSerializer(serializers.ModelSerializer):
+    student = StudentArrivalSerializer()
+    class Meta:
+        model = BuddyArrival
+        fields = ('student', )
+
+class BuddyArrivalsSerializer(serializers.ModelSerializer):
+    buddy_arrivals = BuddyArrivalSerializer(many=True)
+    class Meta:
+        model = Buddy
+        fields = '__all__'
+
+
+
+
+class ArrivalOtherStudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArrivalBooking
+        fields = ('other_students',)
+
 
 
 class BuddySerializer(serializers.ModelSerializer):
