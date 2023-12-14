@@ -19,7 +19,7 @@ class UserInfo(models.Model):
     sex = models.CharField(max_length=255, choices=sex_choices)
     birth_date = models.DateField()
     native_language = models.CharField(max_length=255)
-    other_languages_and_levels = models.CharField(max_length=255)
+    other_languages_and_levels = models.CharField(max_length=255, blank=True)
     contacts = models.ForeignKey('Contacts', on_delete=models.PROTECT, null=True)
 
 
