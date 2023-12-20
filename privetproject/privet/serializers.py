@@ -148,7 +148,7 @@ class UserInfoArrivalSerializer(serializers.ModelSerializer):
 
 
 class StudentArrivalBookingSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserOtherStudentSerializer()
     arrival_booking = ArrivalBookingSerializer()
     class Meta:
         model = Student

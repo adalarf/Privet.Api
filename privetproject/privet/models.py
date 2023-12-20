@@ -89,6 +89,9 @@ class Contacts(models.Model):
 class ArrivalBooking(models.Model):
     arrival_date = models.DateField()
     arrival_time = models.TimeField()
+    flight_number = models.CharField(max_length=255)
+    arrival_point = models.CharField(max_length=255)
+    comment = models.CharField(max_length=255, blank=True)
     other_students = models.ManyToManyField('Student', related_name='other_students', blank=True)
 
 
