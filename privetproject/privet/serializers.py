@@ -79,11 +79,72 @@ class StudentSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError(user_info_serializer.errors)
 
+class ArrivalBookingInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArrivalBooking
+        fields = ('id', 'arrival_date',)
+
+class ArrivalOtherStudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArrivalBooking
+        fields = ('other_students',)
+
+
+class UserInfoOtherStudentSerializer(serializers.ModelSerializer):
+    contacts = ContactsSerializer()
+    class Meta:
+        model = UserInfo
+        fields = ('full_name', 'sex', 'contacts',)
+
+class UserOtherStudentSerializer(serializers.ModelSerializer):
+    user_info = UserInfoOtherStudentSerializer()
+    class Meta:
+        model = User
+        fields = ('user_info',)
+
+
+class OtherStudentsArrivalSerializer(serializers.ModelSerializer):
+    user = UserOtherStudentSerializer()
+    class Meta:
+        model = Student
+        fields = ('citizenship', 'user')
+
+
+class DefiniteArrivalBookingSerializer(serializers.ModelSerializer):
+    other_students = OtherStudentsArrivalSerializer(many=True)
+    class Meta:
+        model = ArrivalBooking
+        fields = '__all__'
 
 class ArrivalBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArrivalBooking
         fields = '__all__'
+
+class UserInfoArrivalSerializer(serializers.ModelSerializer):
+    contacts = ContactsSerializer()
+    class Meta:
+        model = UserInfo
+        fields = ('full_name', 'sex', 'contacts',)
+
+    def create(self, validated_data):
+        contacts_data = validated_data.pop('contacts')
+        user_info = Contacts.objects.create(**contacts_data)
+        res = UserInfo.objects.create(contacts=user_info, **validated_data)
+        return res
+
+    def update(self, instance, validated_data):
+        contacts_data = validated_data.pop('contacts')
+        contacts_serializer = ContactsSerializer(instance=instance.contacts, data=contacts_data)
+        if contacts_serializer.is_valid():
+            contacts_instance = contacts_serializer.save()
+            instance.full_name = validated_data.get('full_name', instance.full_name)
+            instance.sex = validated_data.get('sex', instance.sex)
+            instance.contacts = contacts_instance
+            instance.save()
+            return instance
+        else:
+            raise serializers.ValidationError(contacts_serializer.errors)
 
 
 class StudentArrivalBookingSerializer(serializers.ModelSerializer):
@@ -168,15 +229,6 @@ class BuddyArrivalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Buddy
         fields = '__all__'
-
-
-
-
-
-class ArrivalOtherStudentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ArrivalBooking
-        fields = ('other_students',)
 
 
 
