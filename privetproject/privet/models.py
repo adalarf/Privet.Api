@@ -99,7 +99,7 @@ class Student(models.Model):
 
 
 class BuddyArrival(models.Model):
-    student = models.OneToOneField(Student, on_delete=models.PROTECT)
+    student = models.ForeignKey(Student, on_delete=models.PROTECT)
 
 
 class Buddy(models.Model):

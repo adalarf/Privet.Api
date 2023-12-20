@@ -17,7 +17,7 @@ from .authtoken import ObtainAuthToken
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    # permission_classes = [IsAuthenticated&IsStudentUser]
+    permission_classes = [IsAuthenticated&IsStudentUser]
 
 
 class BuddyProfileView(RetrieveUpdateDestroyAPIView):
@@ -38,7 +38,27 @@ class AllArrivalBookingsView(ListAPIView):
 class DefiniteArrivalBookingView(RetrieveAPIView):
     queryset = ArrivalBooking.objects.all()
     serializer_class = ArrivalBookingSerializer
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        buddy_arrival = BuddyArrival.objects.filter(student__arrival_booking=instance).first()
+        buddy_count = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=instance)
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        student_count = instance.other_students.count() + 1
+        data['student_count'] = student_count
+        if buddy_arrival:
+            buddy = Buddy.objects.get(buddy_arrivals=buddy_arrival)
+            buddy_info = buddy.user.user_info
 
+            buddy_amount = buddy_count.count()
+            data['buddy_amount'] = buddy_amount
+            if buddy_info is None:
+                data['buddy_full_name'] = 'None'
+            else:
+                data['buddy_full_name'] = buddy_info.full_name
+            return Response(data)
+        else:
+            return Response(data)
 
 class AddArrivalToBuddy(APIView):
     def post(self, request, *args, **kwargs):
