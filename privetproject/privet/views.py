@@ -37,20 +37,20 @@ class AllArrivalBookingsView(APIView):
         serializer = ArrivalBookingInfoSerializer(arrival_bookings, many=True)
         data = serializer.data
         for i in data:
-            test = Student.objects.get(arrival_booking=i['id'])
+            student = Student.objects.get(arrival_booking=i['id'])
             buddy_count = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=i['id'])
             buddies_amount = buddy_count.count()
             i['buddies_amount'] = buddies_amount
 
-            other_stud_set = test.arrival_booking.other_students.all()
+            other_stud_set = student.arrival_booking.other_students.all()
             other_stud = ''.join([j.user.user_info.full_name for j in other_stud_set])
             other_stud_citizenship = ''.join([j.citizenship for j in other_stud_set])
             if other_stud == '':
-                i['group_full_names'] = f"{test.user.user_info.full_name}"
-                i['group_countries'] = f"{test.citizenship}"
+                i['group_full_names'] = f"{student.user.user_info.full_name}"
+                i['group_countries'] = f"{student.citizenship}"
             else:
-                i['group_full_names'] = f"{test.user.user_info.full_name} {other_stud}"
-                i['group_countries'] = f"{test.citizenship} {other_stud_citizenship}"
+                i['group_full_names'] = f"{student.user.user_info.full_name} {other_stud}"
+                i['group_countries'] = f"{student.citizenship} {other_stud_citizenship}"
 
         return Response(data)
 
@@ -61,6 +61,8 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         student = Student.objects.get(arrival_booking=instance)
+        buddy = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=instance)
+        buddy_full_names = [i.user.user_info.full_name for i in buddy if i.user.user_info]
         full_name = student.user.user_info.full_name
         sex = student.user.user_info.sex
         citizenship = student.citizenship
@@ -74,6 +76,7 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
         data['phone'] = contacts.phone
         data['telegram'] = contacts.telegram
         data['whatsapp'] = contacts.whatsapp
+        data['buddy_full_names'] = buddy_full_names
 
 
         return Response(data)
