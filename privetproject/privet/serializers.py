@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, UserInfo, Contacts, Student, Buddy, ArrivalBooking, BuddyArrival
+from .models import User, UserInfo, Contacts, Student, Buddy, ArrivalBooking, BuddyArrival, StudentOnlyViewFields
 
 
 class ContactsSerializer(serializers.ModelSerializer):
@@ -78,6 +78,32 @@ class StudentSerializer(serializers.ModelSerializer):
             return instance
         else:
             raise serializers.ValidationError(user_info_serializer.errors)
+
+
+class OnlyViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentOnlyViewFields
+        exclude = ('id', )
+
+class StudentOnlyViewFieldsSerializer(serializers.ModelSerializer):
+    only_view = OnlyViewSerializer()
+    class Meta:
+        model = Student
+        fields = ('only_view',)
+
+    def update(self, instance, validated_data):
+        only_view_data = validated_data.pop('only_view')
+        only_view_instance = instance.only_view
+
+        only_view_instance.institute = only_view_data.get('institute', only_view_instance.institute)
+        only_view_instance.study_program = only_view_data.get('study_program', only_view_instance.study_program)
+        only_view_instance.last_visa_expiration = only_view_data.get('last_visa_expiration',
+                                                                     only_view_instance.last_visa_expiration)
+        only_view_instance.accommodation = only_view_data.get('accommodation', only_view_instance.accommodation)
+        only_view_instance.buddys_comment = only_view_data.get('buddys_comment', only_view_instance.buddys_comment)
+        only_view_instance.save()
+
+        return instance
 
 class ArrivalBookingInfoSerializer(serializers.ModelSerializer):
     class Meta:

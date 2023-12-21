@@ -33,4 +33,5 @@ urlpatterns = [
     path('api/v1/buddy/arrivals/<int:pk>/', views.DefiniteArrivalBookingView.as_view()),
     path('api/v1/buddy/add-arrival/', views.AddArrivalToBuddy.as_view()),
     path('api/v1/buddy/buddy-arrivals/<int:user>/', views.BuddyArrivalsView.as_view()),
+    path('api/v1/buddy/student/<int:pk>/', views.StudentProfileForBuddyView.as_view()),
 ]

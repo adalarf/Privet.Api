@@ -4,7 +4,7 @@ from .models import User, UserInfo
 from .serializers import StudentSerializer, BuddySerializer, StudentSignupSerializer,\
     BuddySignupSerializer, BaseUserSerializer, StudentArrivalBookingSerializer,\
     ArrivalBookingSerializer, BuddyArrivalsSerializer, ArrivalOtherStudentSerializer, \
-    ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer
+    ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer, StudentOnlyViewFieldsSerializer
 from rest_framework.permissions import IsAuthenticated
 from .models import Student, Buddy, ArrivalBooking, BuddyArrival
 from .permissions import IsStudentUser, IsBuddyUser
@@ -20,12 +20,67 @@ class StudentProfileView(RetrieveUpdateDestroyAPIView):
     serializer_class = StudentSerializer
     permission_classes = [IsAuthenticated&IsStudentUser]
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        student = Student.objects.get(pk=instance)
+
+        if student.only_view is None:
+            data['institute'] = ''
+            data['study_program'] = ''
+            data['last_visa_expiration'] = ''
+            data['accommodation'] = ''
+        else:
+            data['institute'] = student.only_view.institute
+            data['study_program'] = student.only_view.study_program
+            data['last_visa_expiration'] = student.only_view.last_visa_expiration
+            data['accommodation'] = student.only_view.accommodation
+
+        return Response(data)
+
 
 class BuddyProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Buddy.objects.all()
     serializer_class = BuddySerializer
     permission_classes = [IsAuthenticated&IsBuddyUser]
 
+class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentOnlyViewFieldsSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        student = Student.objects.get(pk=instance)
+        data['citizenship'] = student.citizenship
+        user = student.user
+        user_info = user.user_info
+        contacts = user_info.contacts
+        contacts = {
+            'vk': contacts.vk,
+            'phone': contacts.phone,
+            'telegram': contacts.telegram,
+            'whatsapp': contacts.whatsapp,
+        }
+        user_info = {
+            'full_name': user_info.full_name,
+            'sex': user_info.sex,
+            'birth_date': user_info.birth_date,
+            'native_language': user_info.native_language,
+            'other_languages_and_levels': user_info.other_languages_and_levels,
+            'contacts': contacts,
+        }
+
+        user_data = {
+            'email': user.email,
+            'user_info': user_info,
+        }
+        data['user'] = user_data
+
+        return Response(data)
 
 class ArrivalBookingView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()

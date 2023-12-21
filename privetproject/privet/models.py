@@ -99,6 +99,15 @@ class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     citizenship = models.CharField(max_length=255)
     arrival_booking = models.OneToOneField(ArrivalBooking, on_delete=models.PROTECT, null=True)
+    only_view = models.OneToOneField('StudentOnlyViewFields', on_delete=models.PROTECT, null=True)
+
+
+class StudentOnlyViewFields(models.Model):
+    institute = models.CharField(max_length=255, blank=True, null=True)
+    study_program = models.CharField(max_length=255, blank=True, null=True)
+    last_visa_expiration = models.DateField(blank=True, null=True)
+    accommodation = models.CharField(max_length=255, blank=True, null=True)
+    buddys_comment = models.CharField(max_length=255, blank=True, null=True)
 
 
 class BuddyArrival(models.Model):
