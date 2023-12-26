@@ -91,19 +91,68 @@ class StudentOnlyViewFieldsSerializer(serializers.ModelSerializer):
         model = Student
         fields = ('only_view',)
 
+
     def update(self, instance, validated_data):
         only_view_data = validated_data.pop('only_view')
         only_view_instance = instance.only_view
 
+        if not only_view_instance:
+            only_view_instance = StudentOnlyViewFields.objects.create()
+            instance.only_view = only_view_instance
+            instance.save()
+
         only_view_instance.institute = only_view_data.get('institute', only_view_instance.institute)
         only_view_instance.study_program = only_view_data.get('study_program', only_view_instance.study_program)
-        only_view_instance.last_visa_expiration = only_view_data.get('last_visa_expiration',
-                                                                     only_view_instance.last_visa_expiration)
+
+        # if 'last_arrival_date' not in only_view_data:
+        #     student = Student.objects.get(only_view=instance.only_view)
+        #     last_arrival = student.arrival_booking.arrival_date
+        #     only_view_instance.last_arrival_date = last_arrival
+        # else:
+        #     only_view_instance.last_arrival_date = only_view_data.get('last_arrival_date', only_view_instance.last_arrival_date)
+
+        only_view_instance.last_visa_expiration = only_view_data.get('last_visa_expiration', only_view_instance.last_visa_expiration)
         only_view_instance.accommodation = only_view_data.get('accommodation', only_view_instance.accommodation)
         only_view_instance.buddys_comment = only_view_data.get('buddys_comment', only_view_instance.buddys_comment)
         only_view_instance.save()
 
         return instance
+
+    # def update(self, instance, validated_data):
+    #     only_view_data = validated_data.pop('only_view')
+    #     only_view_instance = instance.only_view
+    #     if not instance.only_view:
+    #         instance.only_view = StudentOnlyViewFields.objects.create()
+    #
+    #     only_view_instance.institute = only_view_data.get('institute', only_view_instance.institute)
+    #     only_view_instance.study_program = only_view_data.get('study_program', only_view_instance.study_program)
+    #     if 'last_arrival_date' not in only_view_data:
+    #         student = Student.objects.get(only_view=instance.only_view)
+    #         last_arrival = student.arrival_booking.arrival_date
+    #         only_view_instance.last_arrival_date = last_arrival
+    #     else:
+    #         only_view_instance.last_arrival_date = only_view_data.get('last_arrival_date', only_view_instance.last_arrival_date)
+    #     # only_view_instance.last_visa_expiration = only_view_data.get('last_visa_expiration',
+    #                                                                  #only_view_instance.last_visa_expiration)
+    #     only_view_instance.accommodation = only_view_data.get('accommodation', only_view_instance.accommodation)
+    #     only_view_instance.buddys_comment = only_view_data.get('buddys_comment', only_view_instance.buddys_comment)
+    #     only_view_instance.save()
+    #
+    #     return instance
+
+    # def update(self, instance, validated_data):
+    #     only_view_data = validated_data.pop('only_view')
+    #     only_view_instance = instance.only_view
+    #
+    #     only_view_instance.institute = only_view_data.get('institute', only_view_instance.institute)
+    #     only_view_instance.study_program = only_view_data.get('study_program', only_view_instance.study_program)
+    #     only_view_instance.last_visa_expiration = only_view_data.get('last_visa_expiration',
+    #                                                                  only_view_instance.last_visa_expiration)
+    #     only_view_instance.accommodation = only_view_data.get('accommodation', only_view_instance.accommodation)
+    #     only_view_instance.buddys_comment = only_view_data.get('buddys_comment', only_view_instance.buddys_comment)
+    #     only_view_instance.save()
+    #
+    #     return instance
 
 class ArrivalBookingInfoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -255,6 +304,56 @@ class BuddyArrivalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Buddy
         fields = '__all__'
+
+
+
+
+class BuddyStudentOtherInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInfo
+        fields = ('full_name',)
+
+class BuddyStudentUserSerialzier(serializers.ModelSerializer):
+    user_info = BuddyStudentOtherInfoSerializer()
+    class Meta:
+        model = User
+        fields = ('id', 'user_info',)
+
+class BuddyOtherStudentsSerializer(serializers.ModelSerializer):
+    user = BuddyStudentUserSerialzier()
+    class Meta:
+        model = Student
+        fields = ('user', 'citizenship')
+
+class BuddyStudentArrivalBookingSerializer(serializers.ModelSerializer):
+    other_students = BuddyOtherStudentsSerializer(many=True)
+    class Meta:
+        model = ArrivalBooking
+        fields = ('other_students', )
+
+class BuddyStudentArrivalSerializer(serializers.ModelSerializer):
+    user = BuddyStudentUserSerialzier()
+    arrival_booking = BuddyStudentArrivalBookingSerializer()
+    class Meta:
+        model = Student
+        fields = ('user', 'citizenship', 'arrival_booking',)
+
+class BuddyStudentsArrivalsSerializer(serializers.ModelSerializer):
+    student = BuddyStudentArrivalSerializer()
+    class Meta:
+        model = BuddyArrival
+        fields = ('id', 'student',)
+
+
+class BuddyStudentsSerializer(serializers.ModelSerializer):
+    buddy_arrivals = BuddyStudentsArrivalsSerializer(many=True)
+    class Meta:
+        model = Buddy
+        fields = ('buddy_arrivals',)
+
+
+
+
 
 
 

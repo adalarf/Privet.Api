@@ -4,7 +4,7 @@ from .models import User, UserInfo
 from .serializers import StudentSerializer, BuddySerializer, StudentSignupSerializer,\
     BuddySignupSerializer, BaseUserSerializer, StudentArrivalBookingSerializer,\
     ArrivalBookingSerializer, BuddyArrivalsSerializer, ArrivalOtherStudentSerializer, \
-    ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer, StudentOnlyViewFieldsSerializer
+    ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer, StudentOnlyViewFieldsSerializer, BuddyStudentsSerializer
 from rest_framework.permissions import IsAuthenticated
 from .models import Student, Buddy, ArrivalBooking, BuddyArrival
 from .permissions import IsStudentUser, IsBuddyUser
@@ -18,7 +18,7 @@ from .authtoken import ObtainAuthToken
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    permission_classes = [IsAuthenticated&IsStudentUser]
+    # permission_classes = [IsAuthenticated&IsStudentUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -44,7 +44,7 @@ class StudentProfileView(RetrieveUpdateDestroyAPIView):
 class BuddyProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Buddy.objects.all()
     serializer_class = BuddySerializer
-    permission_classes = [IsAuthenticated&IsBuddyUser]
+    # permission_classes = [IsAuthenticated&IsBuddyUser]
 
 class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
@@ -168,6 +168,39 @@ class ArrivalOtherStudentView(APIView):
         arrival_booking.save()
         serializer = ArrivalOtherStudentSerializer(arrival_booking)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class BuddyStudentsView(RetrieveAPIView):
+    queryset = Buddy.objects.all()
+    serializer_class = BuddyStudentsSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        arrivals = data['buddy_arrivals']
+        students = []
+        for i in range(len(arrivals)):
+            arrival = arrivals[i]
+            student_info = {
+                'arrival_id': arrival['id'],
+                'student_full_name': arrival['student']['user']['user_info']['full_name'],
+                'citizenship': arrival['student']['citizenship'],
+                'student_id': arrival['student']['user']['id']
+            }
+            students.append(student_info)
+
+            for j in range(len(arrival['student']['arrival_booking']['other_students'])):
+                other_student_info = {
+                    'arrival_id': arrival['id'],
+                    'student_full_name': arrival['student']['arrival_booking']['other_students'][j]['user']['user_info'][
+                        'full_name'],
+                    'citizenship': arrival['student']['arrival_booking']['other_students'][j]['citizenship'],
+                    'student_id': arrival['student']['arrival_booking']['other_students'][j]['user']['id'],
+                }
+                students.append(other_student_info)
+
+        return Response(students)
 
 
 
