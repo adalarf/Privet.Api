@@ -57,6 +57,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_student = models.BooleanField(default=False)
     is_buddy = models.BooleanField(default=False)
+    is_teamlead = models.BooleanField(default=False)
     user_info = models.ForeignKey(UserInfo, on_delete=models.PROTECT, null=True)
 
     objects = CustomUserManager()

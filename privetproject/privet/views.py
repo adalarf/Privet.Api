@@ -4,7 +4,8 @@ from .models import User, UserInfo
 from .serializers import StudentSerializer, BuddySerializer, StudentSignupSerializer,\
     BuddySignupSerializer, BaseUserSerializer, StudentArrivalBookingSerializer,\
     ArrivalBookingSerializer, BuddyArrivalsSerializer, ArrivalOtherStudentSerializer, \
-    ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer, StudentOnlyViewFieldsSerializer, BuddyStudentsSerializer
+    ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer, StudentOnlyViewFieldsSerializer,\
+    BuddyStudentsSerializer, AddBuddyToArrivalSerializer
 from rest_framework.permissions import IsAuthenticated
 from .models import Student, Buddy, ArrivalBooking, BuddyArrival
 from .permissions import IsStudentUser, IsBuddyUser
@@ -201,6 +202,38 @@ class BuddyStudentsView(RetrieveAPIView):
                 students.append(other_student_info)
 
         return Response(students)
+
+
+
+
+
+
+class AddBuddyToArrivalView(APIView):
+    def post(self, request, *args, **kwargs):
+        arrival_booking_id = request.data.get('arrival_booking_id')
+        buddy_id = request.data.get('buddy_id')
+        buddy = Buddy.objects.get(pk=buddy_id)
+        arrival_booking = Student.objects.get(arrival_booking__id=arrival_booking_id)
+        buddy_arrivals = buddy.buddy_arrivals
+        buddy_arrivals.create(student=arrival_booking)
+        buddy.save()
+        serializer = AddBuddyToArrivalSerializer(buddy_arrivals, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class DeleteBuddyArrivalView(APIView):
+    def delete(self, request):
+        try:
+            buddy_id = request.data.get('buddy_id')
+            buddy_arrival_id = request.data.get('buddy_arrival_id')
+            buddy = Buddy.objects.get(pk=buddy_id)
+            buddy_arrivals = buddy.buddy_arrivals.get(student__arrival_booking_id=buddy_arrival_id)
+            buddy_arrivals.delete()
+            buddy.buddy_arrivals.get(student__arrival_booking_id=buddy_arrival_id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except BuddyArrival.DoesNotExist:
+            return Response("Buddy arrival not found", status=status.HTTP_404_NOT_FOUND)
+
 
 
 

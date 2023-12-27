@@ -35,4 +35,7 @@ urlpatterns = [
     path('api/v1/buddy/buddy-arrivals/<int:user>/', views.BuddyArrivalsView.as_view()),
     path('api/v1/buddy/student/<int:pk>/', views.StudentProfileForBuddyView.as_view()),
     path('api/v1/buddy/buddy-students/<int:pk>/', views.BuddyStudentsView.as_view()),
+
+    path('api/v1/teamlead/add-buddy-to-arrival/', views.AddBuddyToArrivalView.as_view()),
+    path('api/v1/teamlead/delete-arrival/', views.DeleteBuddyArrivalView.as_view()),
 ]

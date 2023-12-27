@@ -353,7 +353,10 @@ class BuddyStudentsSerializer(serializers.ModelSerializer):
 
 
 
-
+class AddBuddyToArrivalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BuddyArrival
+        fields = '__all__'
 
 
 
