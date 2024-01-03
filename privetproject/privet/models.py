@@ -4,6 +4,8 @@ from django.db.models.signals import post_save
 from django.conf import settings
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+import secrets
+from django.core.mail import send_mail
 
 
 
@@ -101,6 +103,24 @@ class Student(models.Model):
     citizenship = models.CharField(max_length=255)
     arrival_booking = models.OneToOneField(ArrivalBooking, on_delete=models.PROTECT, null=True)
     only_view = models.OneToOneField('StudentOnlyViewFields', on_delete=models.PROTECT, null=True)
+    confirmation_code = models.CharField(max_length=6, null=True, blank=True)
+
+    def send_confirmation_email(self):
+        code = secrets.token_hex(3)  # Генерация случайного кода из 6 символов
+        self.confirmation_code = code
+        self.save()
+        subject = 'Подтверждение регистрации'
+        message = f'Ваш код подтверждения: {code}'
+        send_mail(subject, message, settings.EMAIL_HOST_USER, [self.user.email])
+
+    def confirm_registration(self, entered_code):
+        if self.confirmation_code == entered_code:
+            self.confirmation_code = None
+            self.user.is_active = True
+            self.user.save()
+            self.save()
+            return True
+        return False
 
 
 class StudentOnlyViewFields(models.Model):

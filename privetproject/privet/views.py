@@ -229,7 +229,7 @@ class DeleteBuddyArrivalView(APIView):
             buddy = Buddy.objects.get(pk=buddy_id)
             buddy_arrivals = buddy.buddy_arrivals.get(student__arrival_booking_id=buddy_arrival_id)
             buddy_arrivals.delete()
-            buddy.buddy_arrivals.get(student__arrival_booking_id=buddy_arrival_id)
+            #buddy.buddy_arrivals.get(student__arrival_booking_id=buddy_arrival_id)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except BuddyArrival.DoesNotExist:
             return Response("Buddy arrival not found", status=status.HTTP_404_NOT_FOUND)
@@ -240,15 +240,31 @@ class DeleteBuddyArrivalView(APIView):
 
 class StudentSignupView(GenericAPIView):
     serializer_class = StudentSignupSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        return Response({
-            "user": BaseUserSerializer(user, context=self.get_serializer_context()).data,
-            "token": Token.objects.get(user=user).key,
-            "message": "account created"
-        })
+
+        student = Student.objects.get(user=user)
+        student.send_confirmation_email()
+
+        return Response({"message": "Код подтверждения отправлен на вашу почту.", "id": student.pk}, status=status.HTTP_200_OK)
+
+
+class StudentConfirmationView(APIView):
+    def post(self, request):
+        entered_code = request.data.get('code')
+        user_id = request.data.get('user_id')
+
+        try:
+            student = Student.objects.get(user_id=user_id)
+            if student.confirm_registration(entered_code):
+                return Response({"message": "Регистрация успешна.", "token": Token.objects.get(user=student.user).key}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Неверный код подтверждения."}, status=status.HTTP_400_BAD_REQUEST)
+        except Student.DoesNotExist:
+            return Response({"message": "Пользователь не найден."}, status=status.HTTP_404_NOT_FOUND)
 
 class BuddySignupView(GenericAPIView):
     serializer_class = BuddySignupSerializer
