@@ -284,9 +284,6 @@ student_id - id студента, который создал приезд<br>
                                 }
                             },
                             "citizenship": "Kazakhstan",
-                            "confirmation_code": null,
-                            "arrival_booking": null,
-                            "only_view": 2
                         }
                     ],
                     "arrival_date": "2023-12-16",
