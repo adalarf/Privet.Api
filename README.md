@@ -87,6 +87,23 @@ Password – текстовое поле<br>
     "message": "account created"
 }
 ```
+После выполнения POST запроса отправляет код для подтверждения регистрации на указанную почту
+<b>'api/v1/confirm/student/'</b> - Подтверждение регистрации студента. POST запрос в виде:
+```
+{
+    "code": "123456",
+    "user_id": "12"
+}
+```
+code - код, высланный на почту<br>
+user_id - id пользователя, которого регистрируем<br>
+Выдает ответ в виде:
+```
+{
+    "message": "Регистрация успешна.",
+    "token": "e067c3a1f34be27f3131ace783e07a3bc8aa1a5f"
+}
+```
 <b>'api/v1/signup/buddy/'</b> – Регистрация сопровождающего. Всё аналогично студенту, за исключением того, чтобы выводит поле “is_buddy”: true
 
 <b>'api/v1/login/'</b> – вход в аккаунт. POST запрос в виде:
@@ -108,4 +125,232 @@ Password – текстовое поле<br>
 ```
  Поле is_buddy принимает свое значение в зависимости от типа пользователя<br>
 <b>'api/v1/logout/'</b> – Выход из аккаунта. Передается только токен в заголовке<br>
+<br>
+<b>'api/v1/student/arrival-booking/<int:pk>/'</b> - Регистрация приезда студентом. PUT/PATCH запрос в виде (При GET запросе возвращает те же данные):
+```
+{
+    "citizenship": "Kazakhstan",
+    "user": {
+        "user_info": {
+            "full_name": "test52",
+            "sex": "male",
+            "contacts": {
+                "vk": "test",
+                "phone": "111111111111",
+                "telegram": "test",
+                "whatsapp": "test"
+            }
+        }
+    },
+    "arrival_booking": {
+        "id": 4,
+        "arrival_date": "2023-12-29",
+        "arrival_time": "15:00:00",
+        "flight_number": "10101",
+        "arrival_point": "Ekaterinburg",
+        "comment": "",
+        "other_students": [
+            53
+        ]
+    }
+}
+```
+"citizenship" и "user" имеют тот же вид, что и в странице профиля студента<br>
+arrival_booking:<br>
+arrival_date - дата прибытия в формате "YYYY-MM-DD"<br>
+arrival_time - время прибытия в формате "HH:MM"<br>
+flight_number - текстовое поле<br>
+arrival_point - текстовое поле<br>
+comment - текстовое поле<br>
+other_students - id дополнительных участников приезда<br>
+<b>'api/v1/student/arrival-booking/add-student/'</b> - Добавление дополнительных участников приезда. POST запрос в виде:
+```
+{
+    "student_name": "abcde abcde",
+    "student_id": "47"
+}
+```
+student_name - имя студента, добавляемого в приезд<br>
+student_id - id студента, к которому добавляем<br>
+<b>'api/v1/buddy/arrivals/'</b> - Вывод всех приездов. GET запрос, ответ в виде:
+```
+[
+    {
+        "id": 1,
+        "arrival_date": "2023-01-01",
+        "buddies_amount": 1,
+        "group_full_names": "test abc",
+        "group_countries": "test test"
+    },
+]
+```
+id - id приезда<br>
+arrival_data - дата приезда<br>
+buddyies_amount - количество сопровождающих на приезде<br>
+group_full_names - имена всех студентов в приезде<br>
+group_countries - страны всех студентов в приезда<br>
+<b>'api/v1/buddy/arrivals/<int:pk>/'</b> - просмотр конкретного приезда по его id = <int:pk>. GET запрос возвращает:
+```
+{
+    "id": 3,
+    "other_students": [
+        {
+            "citizenship": "Kazakhstan",
+            "user": {
+                "user_info": {
+                    "full_name": "abcde abcde",
+                    "sex": "male",
+                    "contacts": {
+                        "vk": "https://vk.com/ivanov",
+                        "phone": "726789",
+                        "telegram": "@ivanov",
+                        "whatsapp": "+79123456789"
+                    }
+                }
+            }
+        }
+    ],
+    "arrival_date": "2023-12-16",
+    "arrival_time": "15:00:00",
+    "flight_number": "1",
+    "arrival_point": "1",
+    "comment": "",
+    "full_name": "testtt1",
+    "sex": "male",
+    "citizenship": "Kazakhstan",
+    "vk": "https://vk.com/ivanov",
+    "phone": "726789",
+    "telegram": "@ivanov",
+    "whatsapp": "+79123456789",
+    "buddy_full_names": [
+        "test49"
+    ]
+}
+```
+buddy_full_names - имена сопровождающих, записанных на приезд<br>
+other_students относится к студенту, добавленному как дополнительный участник<br>
+остальный поля относятся к студенту, создающему приезд<br>
+<b>'api/v1/buddy/add-arrival/'</b> - Добавление сопровождающего на приезд. POST запрос в виде:
+```
+{
+    "buddy_id": "49",
+    "student_id": "47"
+}
+```
+buddy_id - id сопровождающего<br>
+student_id - id студента, который создал приезд<br>
+<b>'api/v1/buddy/buddy-arrivals/<int:user>/'</b> - Вывод всех приездов, на которые записан сопровождающий с id <int:pk>. GET запрос возвращает:
+```
+{
+    "user": 49,
+    "buddy_arrivals": [
+        {
+            "student": {
+                "citizenship": "Kazakhstan",
+                "user": {
+                    "email": "test47@test.com",
+                    "user_info": {
+                        "full_name": "testtt1",
+                        "sex": "male",
+                        "birth_date": "1990-01-28",
+                        "native_language": "русский",
+                        "other_languages_and_levels": "",
+                        "contacts": {
+                            "vk": "https://vk.com/ivanov",
+                            "phone": "726789",
+                            "telegram": "@ivanov",
+                            "whatsapp": "+79123456789"
+                        }
+                    }
+                },
+                "arrival_booking": {
+                    "id": 3,
+                    "other_students": [
+                        {
+                            "user": {
+                                "email": "test48@test.com",
+                                "user_info": {
+                                    "full_name": "abcde abcde",
+                                    "sex": "male",
+                                    "birth_date": "1990-01-28",
+                                    "native_language": "русский",
+                                    "other_languages_and_levels": "",
+                                    "contacts": {
+                                        "vk": "https://vk.com/ivanov",
+                                        "phone": "726789",
+                                        "telegram": "@ivanov",
+                                        "whatsapp": "+79123456789"
+                                    }
+                                }
+                            },
+                            "citizenship": "Kazakhstan",
+                            "confirmation_code": null,
+                            "arrival_booking": null,
+                            "only_view": 2
+                        }
+                    ],
+                    "arrival_date": "2023-12-16",
+                    "arrival_time": "15:00:00",
+                    "flight_number": "1",
+                    "arrival_point": "1",
+                    "comment": ""
+                }
+            }
+        }
+    ],
+    "buddy_status": "buddy"
+}
+```
+<b>'api/v1/buddy/student/<int:pk>/'</b> - Редактирование сопровождающим полей в профиле студента с id <int:pk>. PUT/PATCH запрос в виде:
+```
+{
+    "only_view": {
+        "institute": "rtf",
+        "study_program": "test1",
+        "last_visa_expiration": "2023-12-21",
+        "accommodation": "Ekaterinburg",
+        "buddys_comment": "test"
+    }
+}
+```
+institute - текстовое поле<br>
+study_program - текстовое поле<br>
+last_visa_expiration - дата, в формате "YYYY-MM-DD"<br>
+accommodation - текстовое поле<br>
+buddys_comment - текстовое поле<br>
+<b>'api/v1/buddy/buddy-students/<int:pk>/'</b> - Список всех студентов сопровождающего. GET запрос возвращает:
+```
+
+    {
+        "arrival_id": 3,
+        "student_full_name": "testtt1",
+        "citizenship": "Kazakhstan",
+        "student_id": 47
+    },
+    {
+        "arrival_id": 3,
+        "student_full_name": "abcde abcde",
+        "citizenship": "Kazakhstan",
+        "student_id": 48
+    }
+]
+```
+<b>'api/v1/teamlead/add-buddy-to-arrival/'</b> - Добавление тимлидом сопровождающего на приезд. POST запрос в виде:
+```
+{
+    "arrival_booking_id": "3",
+    "buddy_id": "55"
+}
+```
+arrival_booking_id - id приезда<br>
+buddy_id - id сопровождающего<br>
+<b>'api/v1/teamlead/delete-arrival/'</b> - Удаление тимлидом сопровождающего из приезда. DELETE запрос в виде:
+```
+{
+    "buddy_id": "55",
+    "buddy_arrival_id": "3"
+}
+```
+buddy_id - id сопровождающего<br>
+buddy_arrival_id - id приезда<br>
 
