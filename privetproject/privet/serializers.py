@@ -273,7 +273,7 @@ class StudentForBuddySerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Student
-        fields = '__all__'
+        exclude = ('confirmation_code', 'arrival_booking', 'only_view')
 
 
 class ArrivalBookingForBuddySerializer(serializers.ModelSerializer):
