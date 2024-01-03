@@ -8,7 +8,7 @@ from .serializers import StudentSerializer, BuddySerializer, StudentSignupSerial
     BuddyStudentsSerializer, AddBuddyToArrivalSerializer
 from rest_framework.permissions import IsAuthenticated
 from .models import Student, Buddy, ArrivalBooking, BuddyArrival
-from .permissions import IsStudentUser, IsBuddyUser
+from .permissions import IsStudentUser, IsBuddyUser, IsConfirmedBuddyUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -19,7 +19,7 @@ from .authtoken import ObtainAuthToken
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    # permission_classes = [IsAuthenticated&IsStudentUser]
+    permission_classes = [IsAuthenticated&IsStudentUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -45,11 +45,12 @@ class StudentProfileView(RetrieveUpdateDestroyAPIView):
 class BuddyProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Buddy.objects.all()
     serializer_class = BuddySerializer
-    # permission_classes = [IsAuthenticated&IsBuddyUser]
+    permission_classes = [IsAuthenticated&IsBuddyUser]
 
 class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentOnlyViewFieldsSerializer
+    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -88,6 +89,7 @@ class ArrivalBookingView(RetrieveUpdateDestroyAPIView):
     serializer_class = StudentArrivalBookingSerializer
 
 class AllArrivalBookingsView(APIView):
+    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
     def get(self, request):
         arrival_bookings = ArrivalBooking.objects.all()
         serializer = ArrivalBookingInfoSerializer(arrival_bookings, many=True)
@@ -114,6 +116,7 @@ class AllArrivalBookingsView(APIView):
 class DefiniteArrivalBookingView(RetrieveAPIView):
     queryset = ArrivalBooking.objects.all()
     serializer_class = DefiniteArrivalBookingSerializer
+    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         student = Student.objects.get(arrival_booking=instance)
@@ -138,6 +141,7 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
         return Response(data)
 
 class AddArrivalToBuddy(APIView):
+    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
     def post(self, request, *args, **kwargs):
         buddy_id = request.data.get('buddy_id')
         buddy = Buddy.objects.get(pk=buddy_id)
@@ -153,6 +157,7 @@ class AddArrivalToBuddy(APIView):
 class BuddyArrivalsView(RetrieveAPIView):
     queryset = Buddy.objects.all()
     serializer_class = BuddyArrivalsSerializer
+    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
     lookup_field = 'user'
 
 
@@ -174,6 +179,7 @@ class ArrivalOtherStudentView(APIView):
 class BuddyStudentsView(RetrieveAPIView):
     queryset = Buddy.objects.all()
     serializer_class = BuddyStudentsSerializer
+    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -233,6 +239,15 @@ class DeleteBuddyArrivalView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except BuddyArrival.DoesNotExist:
             return Response("Buddy arrival not found", status=status.HTTP_404_NOT_FOUND)
+
+
+class ConfirmBuddyView(APIView):
+    def post(self, request):
+        buddy_id = request.data.get('buddy_id')
+        buddy = Buddy.objects.get(pk=buddy_id)
+        buddy.is_confirmed = True
+        buddy.save()
+        return Response(f"Buddy with {buddy_id} id is confirmed", status=status.HTTP_201_CREATED)
 
 
 

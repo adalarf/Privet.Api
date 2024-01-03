@@ -139,3 +139,4 @@ class Buddy(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     buddy_status = models.CharField(max_length=255)
     buddy_arrivals = models.ManyToManyField(BuddyArrival, related_name='buddy')
+    is_confirmed = models.BooleanField(default=False)
