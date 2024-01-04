@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User, UserInfo, Contacts, Student, Buddy, ArrivalBooking, BuddyArrival, StudentOnlyViewFields
+from .models import User, UserInfo, Contacts, Student, Buddy, ArrivalBooking,\
+    BuddyArrival, StudentOnlyViewFields, OtherLanguagesAndLevels
 
 
 class ContactsSerializer(serializers.ModelSerializer):
@@ -7,33 +8,52 @@ class ContactsSerializer(serializers.ModelSerializer):
         model = Contacts
         fields = ('vk', 'phone', 'telegram', 'whatsapp',)
 
+class OtherLanguagesAndLevelsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OtherLanguagesAndLevels
+        fields = ('other_languages_and_levels',)
+
 class UserInfoSerializer(serializers.ModelSerializer):
     contacts = ContactsSerializer()
+    other_languages_and_levels = OtherLanguagesAndLevelsSerializer()
     class Meta:
         model = UserInfo
-        fields = ('full_name', 'sex', 'birth_date', 'native_language', 'other_languages_and_levels', 'contacts',)
+        fields = ('full_name', 'birth_date', 'native_language', 'other_languages_and_levels', 'contacts',)
 
     def create(self, validated_data):
         contacts_data = validated_data.pop('contacts')
+        other_languages_data = validated_data.pop('other_languages_and_levels')
         user_info = Contacts.objects.create(**contacts_data)
-        res = UserInfo.objects.create(contacts=user_info, **validated_data)
+        other_languages_info = OtherLanguagesAndLevels.objects.create(**other_languages_data)
+        res = UserInfo.objects.create(contacts=user_info, other_languages_and_levels=other_languages_info, **validated_data)
         return res
 
     def update(self, instance, validated_data):
-        contacts_data = validated_data.pop('contacts')
-        contacts_serializer = ContactsSerializer(instance=instance.contacts, data=contacts_data)
-        if contacts_serializer.is_valid():
-            contacts_instance = contacts_serializer.save()
-            instance.full_name = validated_data.get('full_name', instance.full_name)
-            instance.sex = validated_data.get('sex', instance.sex)
-            instance.birth_date = validated_data.get('birth_date', instance.birth_date)
-            instance.native_language = validated_data.get('native_language', instance.native_language)
-            instance.other_languages_and_levels = validated_data.get('other_languages_and_levels', instance.other_languages_and_levels)
-            instance.contacts = contacts_instance
-            instance.save()
-            return instance
-        else:
-            raise serializers.ValidationError(contacts_serializer.errors)
+        contacts_data = validated_data.pop('contacts', None)
+        other_languages_data = validated_data.pop('other_languages_and_levels', None)
+
+        instance.full_name = validated_data.get('full_name', instance.full_name)
+        instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+        instance.native_language = validated_data.get('native_language', instance.native_language)
+
+        if contacts_data:
+            contacts_serializer = ContactsSerializer(instance.contacts, data=contacts_data)
+            if contacts_serializer.is_valid():
+                contacts_serializer.save()
+
+        if other_languages_data:
+            other_languages_instance = instance.other_languages_and_levels
+            if other_languages_instance:
+                other_languages_serializer = OtherLanguagesAndLevelsSerializer(other_languages_instance,
+                                                                               data=other_languages_data)
+            else:
+                other_languages_serializer = OtherLanguagesAndLevelsSerializer(data=other_languages_data)
+            if other_languages_serializer.is_valid():
+                other_languages_and_levels = other_languages_serializer.save()
+                instance.other_languages_and_levels = other_languages_and_levels
+
+        instance.save()
+        return instance
 
 
 
@@ -66,7 +86,7 @@ class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Student
-        fields = ('citizenship', 'user',)
+        fields = ('citizenship', 'sex', 'user',)
 
     def update(self, instance, validated_data):
         user_info_data = validated_data.pop('user')
@@ -74,6 +94,7 @@ class StudentSerializer(serializers.ModelSerializer):
         if user_info_serializer.is_valid():
             user_info_instance = user_info_serializer.save()
             instance.citizenship = validated_data.get('citizenship', instance.citizenship)
+            instance.sex = validated_data.get('sex', instance.sex)
             instance.user_info = user_info_instance
             instance.save()
             return instance
@@ -365,14 +386,13 @@ class BuddySerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Buddy
-        fields = ('buddy_status', 'user',)
+        fields = ('user',)
 
     def update(self, instance, validated_data):
         user_info_data = validated_data.pop('user')
         user_info_serializer = UserSerializer(instance=instance.user, data=user_info_data)
         if user_info_serializer.is_valid():
             user_info_instance = user_info_serializer.save()
-            instance.buddy_status = validated_data.get('buddy_status', instance.buddy_status)
             instance.user_info = user_info_instance
             instance.save()
             return instance

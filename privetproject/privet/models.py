@@ -10,19 +10,15 @@ from django.core.mail import send_mail
 
 
 class UserInfo(models.Model):
-    male = 'male'
-    female = 'female'
-    sex_choices = [
-        (male, 'male'),
-        (female, 'female'),
-    ]
-
     full_name = models.CharField(max_length=255)
-    sex = models.CharField(max_length=255, choices=sex_choices)
     birth_date = models.DateField()
     native_language = models.CharField(max_length=255)
-    other_languages_and_levels = models.CharField(max_length=255, blank=True)
+    other_languages_and_levels = models.ForeignKey('OtherLanguagesAndLevels', on_delete=models.PROTECT, blank=True, null=True)
     contacts = models.ForeignKey('Contacts', on_delete=models.PROTECT, null=True)
+
+
+class OtherLanguagesAndLevels(models.Model):
+    other_languages_and_levels = models.CharField(max_length=255)
 
 
 class CustomUserManager(BaseUserManager):
@@ -99,8 +95,15 @@ class ArrivalBooking(models.Model):
 
 
 class Student(models.Model):
+    male = 'male'
+    female = 'female'
+    sex_choices = [
+        (male, 'male'),
+        (female, 'female'),
+    ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     citizenship = models.CharField(max_length=255)
+    sex = models.CharField(max_length=255, choices=sex_choices)
     arrival_booking = models.OneToOneField(ArrivalBooking, on_delete=models.PROTECT, null=True)
     only_view = models.OneToOneField('StudentOnlyViewFields', on_delete=models.PROTECT, null=True)
     confirmation_code = models.CharField(max_length=6, null=True, blank=True)
@@ -137,6 +140,6 @@ class BuddyArrival(models.Model):
 
 class Buddy(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    buddy_status = models.CharField(max_length=255)
+    buddy_status = models.BooleanField(default=False)
+    city = models.CharField(max_length=255)
     buddy_arrivals = models.ManyToManyField(BuddyArrival, related_name='buddy')
-    is_confirmed = models.BooleanField(default=False)

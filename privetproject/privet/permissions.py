@@ -18,5 +18,5 @@ class IsConfirmedBuddyUser(BasePermission):
     def has_permission(self, request, view):
         if request.user.is_buddy:
             buddy = Buddy.objects.get(user=request.user)
-            return buddy.is_confirmed
+            return buddy.buddy_status
         return False

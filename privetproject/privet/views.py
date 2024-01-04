@@ -19,7 +19,7 @@ from .authtoken import ObtainAuthToken
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    # permission_classes = [IsAuthenticated&IsStudentUser]
+    #permission_classes = [IsAuthenticated&IsStudentUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -58,7 +58,22 @@ class StudentProfileView(RetrieveUpdateDestroyAPIView):
 class BuddyProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Buddy.objects.all()
     serializer_class = BuddySerializer
-    permission_classes = [IsAuthenticated&IsBuddyUser]
+    #permission_classes = [IsAuthenticated&IsBuddyUser]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        buddy = Buddy.objects.get(pk=instance)
+        if buddy.user.is_teamlead == True:
+            data['profile_type'] = 'teamlead'
+        else:
+            data['profile_type'] = 'buddy'
+
+        data['buddy_status'] = buddy.buddy_status
+
+        return Response(data)
 
 class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
@@ -258,7 +273,7 @@ class ConfirmBuddyView(APIView):
     def post(self, request):
         buddy_id = request.data.get('buddy_id')
         buddy = Buddy.objects.get(pk=buddy_id)
-        buddy.is_confirmed = True
+        buddy.buddy_status = True
         buddy.save()
         return Response(f"Buddy with {buddy_id} id is confirmed", status=status.HTTP_201_CREATED)
 
