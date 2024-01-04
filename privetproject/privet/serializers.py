@@ -42,7 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
     user_info = UserInfoSerializer()
     class Meta:
         model = User
-        fields = ('email', 'user_info',)
+        fields = ('email', 'university', 'user_info',)
         extra_kwargs = {
             'email': {'validators': []},
         }
@@ -53,6 +53,7 @@ class UserSerializer(serializers.ModelSerializer):
         if user_info_serializer.is_valid():
             user_info_instance = user_info_serializer.save()
             instance.email = validated_data.get('email', instance.email)
+            instance.university = validated_data.get('university', instance.university)
             instance.user_info = user_info_instance
             instance.save()
             return instance

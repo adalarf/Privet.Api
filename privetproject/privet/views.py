@@ -19,14 +19,27 @@ from .authtoken import ObtainAuthToken
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    permission_classes = [IsAuthenticated&IsStudentUser]
+    # permission_classes = [IsAuthenticated&IsStudentUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
+        data['profile_type'] = 'student'
 
         student = Student.objects.get(pk=instance)
+        if BuddyArrival.objects.filter(student=student):
+            buddy = Buddy.objects.filter(buddy_arrivals__student=student).last()
+            data['last_buddy'] = buddy.user.user_info.full_name
+            data['last_arrival_date'] = student.arrival_booking.arrival_date
+        elif BuddyArrival.objects.filter(student__arrival_booking__other_students=student):
+            buddy = Buddy.objects.filter(buddy_arrivals__student__arrival_booking__other_students=student).last()
+            data['last_buddy'] = buddy.user.user_info.full_name
+            arrival_booking = ArrivalBooking.objects.filter(other_students=student).first()
+            data['last_arrival_date'] = arrival_booking.arrival_date
+        else:
+            data['last_buddy'] = ''
+            data['last_arrival_date'] = ''
 
         if student.only_view is None:
             data['institute'] = ''
