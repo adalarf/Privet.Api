@@ -197,7 +197,7 @@ class UserInfoOtherStudentSerializer(serializers.ModelSerializer):
     contacts = ContactsSerializer()
     class Meta:
         model = UserInfo
-        fields = ('full_name', 'sex', 'contacts',)
+        fields = ('full_name', 'contacts',)
 
 class UserOtherStudentSerializer(serializers.ModelSerializer):
     user_info = UserInfoOtherStudentSerializer()
@@ -255,12 +255,13 @@ class StudentArrivalBookingSerializer(serializers.ModelSerializer):
     arrival_booking = ArrivalBookingSerializer()
     class Meta:
         model = Student
-        fields = ('citizenship', 'user', 'arrival_booking')
+        fields = ('citizenship', 'sex', 'user', 'arrival_booking',)
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
         arrival_booking_data = validated_data.pop('arrival_booking', None)
         instance.citizenship = validated_data.get('citizenship', instance.citizenship)
+        instance.sex = validated_data.get('sex', instance.sex)
 
         if user_data:
             user_serializer = UserSerializer(instance.user, data=user_data)
@@ -392,10 +393,11 @@ class BuddySerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Buddy
-        fields = ('user',)
+        fields = ('city', 'user',)
 
     def update(self, instance, validated_data):
         user_info_data = validated_data.pop('user')
+        instance.city = validated_data.get('city', instance.city)
         user_info_serializer = UserSerializer(instance=instance.user, data=user_info_data)
         if user_info_serializer.is_valid():
             user_info_instance = user_info_serializer.save()

@@ -19,7 +19,7 @@ from .authtoken import ObtainAuthToken
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    #permission_classes = [IsAuthenticated&IsStudentUser]
+    permission_classes = [IsAuthenticated&IsStudentUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
