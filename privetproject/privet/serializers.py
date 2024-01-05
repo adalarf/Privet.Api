@@ -15,7 +15,7 @@ class OtherLanguagesAndLevelsSerializer(serializers.ModelSerializer):
 
 class UserInfoSerializer(serializers.ModelSerializer):
     contacts = ContactsSerializer()
-    other_languages_and_levels = OtherLanguagesAndLevelsSerializer(many=True)
+    other_languages_and_levels = OtherLanguagesAndLevelsSerializer(many=True, required=False)
     class Meta:
         model = UserInfo
         fields = ('full_name', 'birth_date', 'native_language', 'other_languages_and_levels', 'contacts',)
