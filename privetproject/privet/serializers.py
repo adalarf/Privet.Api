@@ -11,11 +11,11 @@ class ContactsSerializer(serializers.ModelSerializer):
 class OtherLanguagesAndLevelsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OtherLanguagesAndLevels
-        fields = ('other_languages_and_levels',)
+        fields = ('other_language_and_level',)
 
 class UserInfoSerializer(serializers.ModelSerializer):
     contacts = ContactsSerializer()
-    other_languages_and_levels = OtherLanguagesAndLevelsSerializer()
+    other_languages_and_levels = OtherLanguagesAndLevelsSerializer(many=True)
     class Meta:
         model = UserInfo
         fields = ('full_name', 'birth_date', 'native_language', 'other_languages_and_levels', 'contacts',)
@@ -23,10 +23,14 @@ class UserInfoSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         contacts_data = validated_data.pop('contacts')
         other_languages_data = validated_data.pop('other_languages_and_levels')
-        user_info = Contacts.objects.create(**contacts_data)
-        other_languages_info = OtherLanguagesAndLevels.objects.create(**other_languages_data)
-        res = UserInfo.objects.create(contacts=user_info, other_languages_and_levels=other_languages_info, **validated_data)
-        return res
+        contacts = Contacts.objects.create(**contacts_data)
+
+        user_info = UserInfo.objects.create(contacts=contacts, **validated_data)
+        for language_data in other_languages_data:
+            language = OtherLanguagesAndLevels.objects.create(**language_data)
+            user_info.other_languages_and_levels.add(language)
+
+        return user_info
 
     def update(self, instance, validated_data):
         contacts_data = validated_data.pop('contacts', None)
@@ -42,15 +46,17 @@ class UserInfoSerializer(serializers.ModelSerializer):
                 contacts_serializer.save()
 
         if other_languages_data:
-            other_languages_instance = instance.other_languages_and_levels
-            if other_languages_instance:
-                other_languages_serializer = OtherLanguagesAndLevelsSerializer(other_languages_instance,
-                                                                               data=other_languages_data)
-            else:
-                other_languages_serializer = OtherLanguagesAndLevelsSerializer(data=other_languages_data)
-            if other_languages_serializer.is_valid():
-                other_languages_and_levels = other_languages_serializer.save()
-                instance.other_languages_and_levels = other_languages_and_levels
+            instance.other_languages_and_levels.clear()  # Удалить все связи с другими языками и уровнями
+            for language_data in other_languages_data:
+                language_id = language_data.get('id')
+                if language_id:
+                    language_instance = OtherLanguagesAndLevels.objects.get(id=language_id)
+                    language_serializer = OtherLanguagesAndLevelsSerializer(language_instance, data=language_data)
+                else:
+                    language_serializer = OtherLanguagesAndLevelsSerializer(data=language_data)
+                if language_serializer.is_valid():
+                    language = language_serializer.save()
+                    instance.other_languages_and_levels.add(language)
 
         instance.save()
         return instance

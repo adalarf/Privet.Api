@@ -13,12 +13,13 @@ class UserInfo(models.Model):
     full_name = models.CharField(max_length=255)
     birth_date = models.DateField()
     native_language = models.CharField(max_length=255)
-    other_languages_and_levels = models.ForeignKey('OtherLanguagesAndLevels', on_delete=models.PROTECT, blank=True, null=True)
+    other_languages_and_levels = models.ManyToManyField('OtherLanguagesAndLevels',
+                                                        related_name='other_languages_and_levels', blank=True)
     contacts = models.ForeignKey('Contacts', on_delete=models.PROTECT, null=True)
 
 
 class OtherLanguagesAndLevels(models.Model):
-    other_languages_and_levels = models.CharField(max_length=255)
+    other_language_and_level = models.CharField(max_length=255)
 
 
 class CustomUserManager(BaseUserManager):
