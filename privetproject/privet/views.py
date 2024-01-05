@@ -86,6 +86,7 @@ class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
         data = serializer.data
         student = Student.objects.get(pk=instance)
         data['citizenship'] = student.citizenship
+        data['sex'] = student.sex
         user = student.user
         user_info = user.user_info
         contacts = user_info.contacts
@@ -97,10 +98,43 @@ class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
         }
         user_info = {
             'full_name': user_info.full_name,
-            'sex': user_info.sex,
             'birth_date': user_info.birth_date,
             'native_language': user_info.native_language,
-            'other_languages_and_levels': user_info.other_languages_and_levels,
+            'other_languages_and_levels': [i.other_language_and_level for i in user_info.other_languages_and_levels.all()],
+            'contacts': contacts,
+        }
+
+        user_data = {
+            'email': user.email,
+            'user_info': user_info,
+        }
+        data['user'] = user_data
+
+        return Response(data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        student = Student.objects.get(pk=instance)
+        data = serializer.data
+        data['citizenship'] = student.citizenship
+        data['sex'] = student.sex
+        user = student.user
+        user_info = user.user_info
+        contacts = user_info.contacts
+        contacts = {
+            'vk': contacts.vk,
+            'phone': contacts.phone,
+            'telegram': contacts.telegram,
+            'whatsapp': contacts.whatsapp,
+        }
+        user_info = {
+            'full_name': user_info.full_name,
+            'birth_date': user_info.birth_date,
+            'native_language': user_info.native_language,
+            'other_languages_and_levels': [i.other_language_and_level for i in user_info.other_languages_and_levels.all()],
             'contacts': contacts,
         }
 
