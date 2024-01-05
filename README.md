@@ -5,15 +5,20 @@
  Для выполнения доступны GET, PUT, PATCH, DELETE, HEAD, OPTIONS запросы. Данные передаются в виде:<br>
  ```
 {
-    "citizenship": "test",
-    "user":{
-        "email": "testemail1@gmail.com",
-        "user_info":{
-            "full_name": "Иванов Иван",
-            "sex": "male",
-            "birth_date": "1990-01-01",
+    "citizenship": "Kazakhstan",
+    "sex": "male",
+    "user": {
+        "email": "test50@test.com",
+        "university": "test",
+        "user_info": {
+            "full_name": "abcde abcde",
+            "birth_date": "1990-01-28",
             "native_language": "русский",
-            "other_languages_and_levels": "английский - B2",
+            "other_languages_and_levels": [
+                {
+                    "other_language_and_level": "test"
+                }
+            ],
             "contacts": {
                 "vk": "https://vk.com/ivanov",
                 "phone": "726789",
@@ -21,48 +26,69 @@
                 "whatsapp": "+79123456789"
             }
         }
-    }
+    },
+    "profile_type": "student",
+    "last_buddy": "",
+    "last_arrival_date": "",
+    "institute": "rtf",
+    "study_program": "test1",
+    "last_visa_expiration": "1991-08-01",
+    "accommodation": "Ekaterinburg"
 }
 ```
 Citizenship – текстовое поле(должен быть список со странами, но пока так)<br>
-Email – поле формата EmailField<br>
-full_name – текстовое поле<br>
 sex – поле со значением либо “male” либо “female”<br>
+Email – поле формата EmailField<br>
+university - текстовое поле<br>
+full_name – текстовое поле<br>
 birth_date – поле даты в формате “YYYY-MM-DD”<br>
 native_language – текствое поле<br>
-other_languages_and_levels – текстовое поле<br>
+other_language_and_level – текстовое поле<br>
 vk – текстовое поле<br>
 phone – цифровое поле<br>
 telegram – текстовое поле<br>
 whatsapp – текстовое поле<br>
+profile_type - заполняется автоматически<br>
+last_buddy - заполняется автоматически<br>
+last_arrival_date - заполняется автоматически<br>
+institute - текстовое поле, заполняется студентом<br>
+study_program - текстовое поле, заполняется студентом<br>
+last_visa_expiration - поле даты в формате “YYYY-MM-DD”, заполняется студентом<br>
+accommodation -текстовое поле, заполняется студентом<br>
 
 <b>'api/v1/buddy/profile/<int:pk>/'</b> – Профиль сопровождающего, где <int:pk> его id.<br>
 Для доступа передается токен.
 Для выполнения доступны GET, PUT, PATCH, DELETE, HEAD, OPTIONS запросы.<br>
-Структура запроса такая же, как и у студента, за исключением поля buddy_status:
+Структура запроса такая же, как и у студента, за исключением поля buddy_status и city, а также отсутствуют поля sex и citizenship:
 ```
 {
-    "buddy_status": "is_buddy",
-    "user":{
-        "email": "testemail1@gmail.com",
-        "user_info":{
-            "full_name": "Иванов Иван",
-            "sex": "male",
-            "birth_date": "1990-01-01",
-            "native_language": "русский",
-            "other_languages_and_levels": "английский - B2",
+    "city": "test1",
+    "user": {
+        "email": "test49@test.com",
+        "university": "test",
+        "user_info": {
+            "full_name": "test49",
+            "birth_date": "1991-08-01",
+            "native_language": "test",
+            "other_languages_and_levels": [
+                {
+                    "other_language_and_level": "test"
+                }
+            ],
             "contacts": {
-                "vk": "https://vk.com/ivanov",
-                "phone": "726789",
-                "telegram": "@ivanov",
-                "whatsapp": "+79123456789"
+                "vk": "test1",
+                "phone": "111111111111",
+                "telegram": "test",
+                "whatsapp": "test"
             }
         }
-    }
+    },
+    "profile_type": "buddy",
+    "buddy_status": false
 }
 ```
-
-buddy_status – текстовое поле(заглушка, поле должно присваиваться автоматически)<br>
+city - текстовое поле<br>
+buddy_status – логическое поле, изменять может тимлид, false - неподтвержденный статус, true - подтвержденный<br>
 </b>'api/v1/signup/student/'</b> – Регистрация студента. Выполняет POST запрос в виде:
 ```
 {
@@ -130,15 +156,15 @@ Password – текстовое поле<br>
 ```
 {
     "citizenship": "Kazakhstan",
+    "sex": "male",
     "user": {
         "user_info": {
-            "full_name": "test52",
-            "sex": "male",
+            "full_name": "abcde abcde",
             "contacts": {
-                "vk": "test",
-                "phone": "111111111111",
-                "telegram": "test",
-                "whatsapp": "test"
+                "vk": "https://vk.com/ivanov",
+                "phone": "726789",
+                "telegram": "@ivanov",
+                "whatsapp": "+79123456789"
             }
         }
     },
@@ -155,7 +181,7 @@ Password – текстовое поле<br>
     }
 }
 ```
-"citizenship" и "user" имеют тот же вид, что и в странице профиля студента<br>
+"citizenship", "sex" и "user" имеют тот же вид, что и в странице профиля студента<br>
 arrival_booking:<br>
 arrival_date - дата прибытия в формате "YYYY-MM-DD"<br>
 arrival_time - время прибытия в формате "HH:MM"<br>
@@ -315,6 +341,37 @@ study_program - текстовое поле<br>
 last_visa_expiration - дата, в формате "YYYY-MM-DD"<br>
 accommodation - текстовое поле<br>
 buddys_comment - текстовое поле<br>
+GET запрос выдает ответ в виде:
+```
+{
+    "only_view": {
+        "institute": "rtf",
+        "study_program": "test1",
+        "last_visa_expiration": "1991-08-01",
+        "accommodation": "Ekaterinburg",
+        "buddys_comment": "test"
+    },
+    "citizenship": "Kazakhstan",
+    "sex": "male",
+    "user": {
+        "email": "test50@test.com",
+        "user_info": {
+            "full_name": "abcde abcde",
+            "birth_date": "1990-01-28",
+            "native_language": "русский",
+            "other_languages_and_levels": [
+                "test"
+            ],
+            "contacts": {
+                "vk": "https://vk.com/ivanov",
+                "phone": "726789",
+                "telegram": "@ivanov",
+                "whatsapp": "+79123456789"
+            }
+        }
+    }
+}
+```
 <b>'api/v1/buddy/buddy-students/<int:pk>/'</b> - Список всех студентов сопровождающего. GET запрос возвращает:
 ```
 
