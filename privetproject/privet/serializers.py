@@ -199,11 +199,35 @@ class UserInfoOtherStudentSerializer(serializers.ModelSerializer):
         model = UserInfo
         fields = ('full_name', 'contacts',)
 
+
+    def update(self, instance, validated_data):
+        contacts_data = validated_data.pop('contacts')
+        contacts_serializer = ContactsSerializer(instance=instance.contacts, data=contacts_data)
+        if contacts_serializer.is_valid():
+            contacts_instance = contacts_serializer.save()
+            instance.full_name = validated_data.get('full_name', instance.full_name)
+            instance.contacts = contacts_instance
+            instance.save()
+            return instance
+        else:
+            raise serializers.ValidationError(contacts_serializer.errors)
+
+
+
 class UserOtherStudentSerializer(serializers.ModelSerializer):
     user_info = UserInfoOtherStudentSerializer()
     class Meta:
         model = User
         fields = ('user_info',)
+
+    def update(self, instance, validated_data):
+        user_info_data = validated_data.pop('user_info', {})
+        user_info_instance = instance.user_info
+        user_info_serializer = UserInfoOtherStudentSerializer(user_info_instance, data=user_info_data)
+        if user_info_serializer.is_valid():
+            user_info_serializer.save()
+        instance.save()
+        return instance
 
 
 class OtherStudentsArrivalSerializer(serializers.ModelSerializer):
@@ -258,18 +282,19 @@ class StudentArrivalBookingSerializer(serializers.ModelSerializer):
         fields = ('citizenship', 'sex', 'user', 'arrival_booking',)
 
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', None)
+        user_data = validated_data.pop('user', {})
         arrival_booking_data = validated_data.pop('arrival_booking', None)
         instance.citizenship = validated_data.get('citizenship', instance.citizenship)
         instance.sex = validated_data.get('sex', instance.sex)
 
-        if user_data:
-            user_serializer = UserSerializer(instance.user, data=user_data)
-            if user_serializer.is_valid():
-                user_serializer.save()
+        user_instance = instance.user
+        user_serializer = UserOtherStudentSerializer(user_instance, data=user_data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+
 
         if arrival_booking_data:
-            arrival_booking_instance = instance.arrival_booking  # Получаем экземпляр ArrivalBooking
+            arrival_booking_instance = instance.arrival_booking
             if arrival_booking_instance:
                 arrival_booking_serializer = ArrivalBookingSerializer(arrival_booking_instance,
                                                                       data=arrival_booking_data)
@@ -277,7 +302,7 @@ class StudentArrivalBookingSerializer(serializers.ModelSerializer):
                 arrival_booking_serializer = ArrivalBookingSerializer(data=arrival_booking_data)
             if arrival_booking_serializer.is_valid():
                 arrival_booking = arrival_booking_serializer.save()
-                instance.arrival_booking = arrival_booking  # Сохраняем созданный или обновленный экземпляр ArrivalBooking
+                instance.arrival_booking = arrival_booking
 
         instance.save()
         return instance
