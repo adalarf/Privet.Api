@@ -30,6 +30,10 @@ urlpatterns = [
     path('api/v1/login/', views.CustomAuthToken.as_view()),
     path('api/v1/logout/', views.LogoutView.as_view()),
 
+    path('api/v1/send-email/', views.SendEmailView.as_view()),
+    path('api/v1/confirm-email/', views.EmailConfirmationView.as_view()),
+    path('api/v1/update-password/', views.UpdatePasswordView.as_view()),
+
     path('api/v1/student/arrival-booking/<int:pk>/', views.ArrivalBookingView.as_view()),
     path('api/v1/student/arrival-booking/add-student/', views.ArrivalOtherStudentView.as_view()),
 

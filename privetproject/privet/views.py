@@ -7,13 +7,16 @@ from .serializers import StudentSerializer, BuddySerializer, StudentSignupSerial
     ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer, StudentOnlyViewFieldsSerializer,\
     BuddyStudentsSerializer, AddBuddyToArrivalSerializer
 from rest_framework.permissions import IsAuthenticated
-from .models import Student, Buddy, ArrivalBooking, BuddyArrival
+from .models import Student, Buddy, ArrivalBooking, BuddyArrival, PassCode
 from .permissions import IsStudentUser, IsBuddyUser, IsConfirmedBuddyUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from .authtoken import ObtainAuthToken
+import secrets
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
@@ -354,6 +357,47 @@ class BuddySignupView(GenericAPIView):
             "token": Token.objects.get(user=user).key,
             "message": "account created"
         })
+
+
+class SendEmailView(GenericAPIView):
+    def post(self, request):
+        email = request.data.get('email')
+        user = User.objects.get(email=email)
+        if user:
+            passcode, created = PassCode.objects.get_or_create(user=user, defaults={
+                'code': secrets.token_hex(3)})
+            if not created:
+                passcode.code = secrets.token_hex(3)
+                passcode.save()
+            subject = 'Сброс пароля'
+            message = f'Ваш код подтверждения: {passcode.code}'
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
+        else:
+            return Response('Аккаунт не был найден')
+        return Response('Код отправлен')
+
+
+class EmailConfirmationView(APIView):
+    def post(self, request):
+        code = request.data.get('code')
+        passcode = PassCode.objects.get(code=code)
+        if passcode:
+            passcode.code = ''
+            return Response({'response':'Код верен', 'id': passcode.user.id})
+        else:
+            return Response('Код не верен')
+
+class UpdatePasswordView(APIView):
+    def post(self, request):
+        password = request.data.get('password')
+        user_id = request.data.get('user_id')
+
+        user = User.objects.get(id=user_id)
+        if user:
+            user.set_password(password)
+            user.save()
+            return Response('Пароль изменён')
+
 
 
 class CustomAuthToken(ObtainAuthToken):

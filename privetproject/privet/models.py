@@ -79,6 +79,11 @@ class User(AbstractBaseUser):
         return True
 
 
+class PassCode(models.Model):
+    user = models.OneToOneField('User', on_delete=models.PROTECT)
+    code = models.CharField(max_length=255)
+
+
 class Contacts(models.Model):
     vk = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=255, blank=True)
