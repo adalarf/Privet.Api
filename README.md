@@ -189,6 +189,25 @@ flight_number - текстовое поле<br>
 arrival_point - текстовое поле<br>
 comment - текстовое поле<br>
 other_students - id дополнительных участников приезда<br>
+<b>'api/v1/send-email/'<b> - Отправляет код для подтверждения смены пароля на указанный email. POST запрос в виде:
+```
+{
+    "email": "jodix98630@pursip.com"
+}
+```
+<b>'api/v1/confirm-email/' - Подтверждение кода для смены пароля. POST запрос в виде:
+```
+{
+    "code": "910926"
+}
+```
+<b>'api/v1/update-password/'<b> - Смена пароля. POST запрос в виде:
+```
+{
+    "password": "12345qwerty",
+    "user_id": "61"
+}
+```
 <b>'api/v1/student/arrival-booking/add-student/'</b> - Добавление дополнительных участников приезда. POST запрос в виде:
 ```
 {
