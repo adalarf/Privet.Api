@@ -11,7 +11,7 @@ class ContactsSerializer(serializers.ModelSerializer):
 class OtherLanguagesAndLevelsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OtherLanguagesAndLevels
-        fields = ('other_language_and_level',)
+        fields = ('language', 'level')
 
 class UserInfoSerializer(serializers.ModelSerializer):
     contacts = ContactsSerializer()
@@ -21,8 +21,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ('full_name', 'birth_date', 'native_language', 'other_languages_and_levels', 'contacts',)
 
     def create(self, validated_data):
-        contacts_data = validated_data.pop('contacts')
-        other_languages_data = validated_data.pop('other_languages_and_levels')
+        contacts_data = validated_data.pop('contacts', None)
+        other_languages_data = validated_data.pop('other_languages_and_levels', None)
         contacts = Contacts.objects.create(**contacts_data)
 
         user_info = UserInfo.objects.create(contacts=contacts, **validated_data)

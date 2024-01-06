@@ -61,7 +61,7 @@ class StudentProfileView(RetrieveUpdateDestroyAPIView):
 class BuddyProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Buddy.objects.all()
     serializer_class = BuddySerializer
-    permission_classes = [IsAuthenticated&IsBuddyUser]
+    #permission_classes = [IsAuthenticated&IsBuddyUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

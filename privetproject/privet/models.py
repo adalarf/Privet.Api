@@ -19,7 +19,8 @@ class UserInfo(models.Model):
 
 
 class OtherLanguagesAndLevels(models.Model):
-    other_language_and_level = models.CharField(max_length=255, blank=True)
+    language = models.CharField(max_length=255)
+    level = models.CharField(max_length=255)
 
 
 class CustomUserManager(BaseUserManager):
