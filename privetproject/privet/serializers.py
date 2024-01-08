@@ -26,9 +26,10 @@ class UserInfoSerializer(serializers.ModelSerializer):
         contacts = Contacts.objects.create(**contacts_data)
 
         user_info = UserInfo.objects.create(contacts=contacts, **validated_data)
-        for language_data in other_languages_data:
-            language = OtherLanguagesAndLevels.objects.create(**language_data)
-            user_info.other_languages_and_levels.add(language)
+        if other_languages_data:
+            for language_data in other_languages_data:
+                language = OtherLanguagesAndLevels.objects.create(**language_data)
+                user_info.other_languages_and_levels.add(language)
 
         return user_info
 
