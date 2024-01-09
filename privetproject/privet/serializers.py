@@ -247,7 +247,7 @@ class DefiniteArrivalBookingSerializer(serializers.ModelSerializer):
 class ArrivalBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArrivalBooking
-        fields = '__all__'
+        exclude = ('other_students',)
 
 class UserInfoArrivalSerializer(serializers.ModelSerializer):
     contacts = ContactsSerializer()
