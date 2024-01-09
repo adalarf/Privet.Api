@@ -99,6 +99,11 @@ class ArrivalBooking(models.Model):
     arrival_point = models.CharField(max_length=255)
     comment = models.CharField(max_length=255, blank=True)
     other_students = models.ManyToManyField('Student', related_name='other_students', blank=True)
+    tickets = models.ManyToManyField('Ticket', related_name='tickets', blank=True)
+
+
+class Ticket(models.Model):
+    file = models.FileField(upload_to='tickets')
 
 
 class Student(models.Model):

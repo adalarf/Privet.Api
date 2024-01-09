@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, UserInfo, Contacts, Student, Buddy, ArrivalBooking,\
-    BuddyArrival, StudentOnlyViewFields, OtherLanguagesAndLevels
+    BuddyArrival, StudentOnlyViewFields, OtherLanguagesAndLevels, Ticket
 
 
 class ContactsSerializer(serializers.ModelSerializer):
@@ -244,7 +244,14 @@ class DefiniteArrivalBookingSerializer(serializers.ModelSerializer):
         model = ArrivalBooking
         fields = '__all__'
 
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ('file',)
+
+
 class ArrivalBookingSerializer(serializers.ModelSerializer):
+    tickets = TicketSerializer(many=True, required=False)
     class Meta:
         model = ArrivalBooking
         exclude = ('other_students',)
