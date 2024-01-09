@@ -170,6 +170,11 @@ Password – текстовое поле<br>
     },
     "arrival_booking": {
         "id": 4,
+        "tickets": [
+            {
+                file: "file"
+            }
+        ],
         "arrival_date": "2023-12-29",
         "arrival_time": "15:00:00",
         "flight_number": "10101",
@@ -189,19 +194,19 @@ flight_number - текстовое поле<br>
 arrival_point - текстовое поле<br>
 comment - текстовое поле<br>
 other_students - id дополнительных участников приезда<br>
-<b>'api/v1/send-email/'<b> - Отправляет код для подтверждения смены пароля на указанный email. POST запрос в виде:
+<b>'api/v1/send-email/'</b> - Отправляет код для подтверждения смены пароля на указанный email. POST запрос в виде:
 ```
 {
     "email": "jodix98630@pursip.com"
 }
 ```
-<b>'api/v1/confirm-email/' - Подтверждение кода для смены пароля. POST запрос в виде:
+<b>'api/v1/confirm-email/'</b> - Подтверждение кода для смены пароля. POST запрос в виде:
 ```
 {
     "code": "910926"
 }
 ```
-<b>'api/v1/update-password/'<b> - Смена пароля. POST запрос в виде:
+<b>'api/v1/update-password/'</b> - Смена пароля. POST запрос в виде:
 ```
 {
     "password": "12345qwerty",
