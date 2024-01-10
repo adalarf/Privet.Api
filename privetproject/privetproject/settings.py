@@ -34,6 +34,7 @@ AUTH_USER_MODEL = 'privet.User'
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,6 +47,14 @@ INSTALLED_APPS = [
     'djoser',
     'corsheaders',
 ]
+
+ASGI_APPLICATION = 'privetproject.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND':'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
