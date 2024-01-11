@@ -14,6 +14,13 @@ class IsBuddyUser(BasePermission):
         return bool(request.user and request.user.is_buddy)
 
 
+class IsTeamleadUser(BasePermission):
+    def has_permission(self, request, view):
+
+        return bool(request.user and request.user.is_teamlead)
+
+
+
 class IsConfirmedBuddyUser(BasePermission):
     def has_permission(self, request, view):
         if request.user.is_buddy:

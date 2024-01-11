@@ -81,7 +81,6 @@ class BuddyProfileView(RetrieveUpdateDestroyAPIView):
 class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentOnlyViewFieldsSerializer
-    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -152,6 +151,7 @@ class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
 class ArrivalBookingView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentArrivalBookingSerializer
+    permission_classes = [IsAuthenticated & IsStudentUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -240,6 +240,7 @@ class BuddyArrivalsView(RetrieveAPIView):
 
 
 class ArrivalOtherStudentView(APIView):
+    permission_classes = [IsAuthenticated & IsStudentUser]
     def post(self, request, *args, **kwargs):
         student_name = request.data.get('student_name')
         other_info_student = UserInfo.objects.get(full_name=student_name)
