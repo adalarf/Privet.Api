@@ -8,7 +8,7 @@ from .serializers import StudentSerializer, BuddySerializer, StudentSignupSerial
     BuddyStudentsSerializer, AddBuddyToArrivalSerializer
 from rest_framework.permissions import IsAuthenticated
 from .models import Student, Buddy, ArrivalBooking, BuddyArrival, PassCode
-from .permissions import IsStudentUser, IsBuddyUser, IsConfirmedBuddyUser
+from .permissions import IsStudentUser, IsBuddyUser, IsConfirmedBuddyUser, IsConfirmedBuddyArrivalUser, IsTeamleadUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -81,6 +81,7 @@ class BuddyProfileView(RetrieveUpdateDestroyAPIView):
 class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentOnlyViewFieldsSerializer
+    permission_classes = [IsAuthenticated&IsConfirmedBuddyArrivalUser]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -294,6 +295,7 @@ class BuddyStudentsView(RetrieveAPIView):
 
 
 class AddBuddyToArrivalView(APIView):
+    permission_classes = [IsAuthenticated&IsTeamleadUser]
     def post(self, request, *args, **kwargs):
         arrival_booking_id = request.data.get('arrival_booking_id')
         buddy_id = request.data.get('buddy_id')
@@ -307,6 +309,7 @@ class AddBuddyToArrivalView(APIView):
 
 
 class DeleteBuddyArrivalView(APIView):
+    permission_classes = [IsAuthenticated & IsTeamleadUser]
     def delete(self, request):
         try:
             buddy_id = request.data.get('buddy_id')
@@ -321,6 +324,7 @@ class DeleteBuddyArrivalView(APIView):
 
 
 class ConfirmBuddyArrivalView(APIView):
+    permission_classes = [IsAuthenticated & IsTeamleadUser]
     def post(self, request):
         buddy_id = request.data.get('buddy_id')
         arrival_id = request.data.get('arrival_id')
@@ -333,6 +337,7 @@ class ConfirmBuddyArrivalView(APIView):
 
 
 class ConfirmBuddyView(APIView):
+    permission_classes = [IsAuthenticated & IsTeamleadUser]
     def post(self, request):
         buddy_id = request.data.get('buddy_id')
         buddy = Buddy.objects.get(pk=buddy_id)

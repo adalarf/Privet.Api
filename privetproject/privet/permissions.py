@@ -27,3 +27,12 @@ class IsConfirmedBuddyUser(BasePermission):
             buddy = Buddy.objects.get(user=request.user)
             return buddy.buddy_status
         return False
+
+
+class IsConfirmedBuddyArrivalUser(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_buddy:
+            buddy = request.user.buddy
+            confirmed_arrival = buddy.buddy_arrivals.filter(student=view.get_object(), buddy_arrival_status=True).first()
+            return confirmed_arrival is not None
+        return False
