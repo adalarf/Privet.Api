@@ -148,6 +148,7 @@ class StudentOnlyViewFields(models.Model):
 
 class BuddyArrival(models.Model):
     student = models.ForeignKey(Student, on_delete=models.PROTECT)
+    buddy_arrival_status = models.BooleanField(default=False)
 
 
 class Buddy(models.Model):

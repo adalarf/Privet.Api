@@ -198,6 +198,7 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
         student = Student.objects.get(arrival_booking=instance)
         buddy = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=instance)
         buddy_full_names = [i.user.user_info.full_name for i in buddy if i.user.user_info]
+        buddy_id = [i.pk for i in buddy]
         full_name = student.user.user_info.full_name
         sex = student.user.user_info.sex
         citizenship = student.citizenship
@@ -212,6 +213,7 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
         data['telegram'] = contacts.telegram
         data['whatsapp'] = contacts.whatsapp
         data['buddy_full_names'] = buddy_full_names
+        data['buddy_id'] = buddy_id
 
 
         return Response(data)
@@ -315,6 +317,18 @@ class DeleteBuddyArrivalView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except BuddyArrival.DoesNotExist:
             return Response("Buddy arrival not found", status=status.HTTP_404_NOT_FOUND)
+
+
+class ConfirmBuddyArrivalView(APIView):
+    def post(self, request):
+        buddy_id = request.data.get('buddy_id')
+        arrival_id = request.data.get('arrival_id')
+        buddy = Buddy.objects.get(pk=buddy_id)
+        arrival = ArrivalBooking.objects.get(pk=arrival_id)
+        buddy_arrival = buddy.buddy_arrivals.get(student__arrival_booking=arrival)
+        buddy_arrival.buddy_arrival_status = True
+        buddy_arrival.save()
+        return Response(f'Сопровождающий {buddy_id} подтвержден')
 
 
 class ConfirmBuddyView(APIView):
