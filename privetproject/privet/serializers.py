@@ -186,7 +186,7 @@ class StudentOnlyViewFieldsSerializer(serializers.ModelSerializer):
 class ArrivalBookingInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArrivalBooking
-        fields = ('id', 'arrival_date',)
+        fields = ('id', 'arrival_date', 'arrival_time', 'arrival_point',)
 
 class ArrivalOtherStudentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -232,17 +232,17 @@ class UserOtherStudentSerializer(serializers.ModelSerializer):
 
 
 class OtherStudentsArrivalSerializer(serializers.ModelSerializer):
-    user = UserOtherStudentSerializer()
+    user = UserSerializer()
     class Meta:
         model = Student
-        fields = ('citizenship', 'user')
+        fields = ('citizenship', 'sex', 'user')
 
 
 class DefiniteArrivalBookingSerializer(serializers.ModelSerializer):
-    other_students = OtherStudentsArrivalSerializer(many=True)
+    students = OtherStudentsArrivalSerializer(many=True, source='other_students')
     class Meta:
         model = ArrivalBooking
-        fields = '__all__'
+        exclude = ('other_students',)
 
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:

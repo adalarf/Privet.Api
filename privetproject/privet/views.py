@@ -185,18 +185,10 @@ class AllArrivalBookingsView(APIView):
         for i in data:
             student = Student.objects.get(arrival_booking=i['id'])
             buddy_count = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=i['id'])
+            students_amount = student.arrival_booking.other_students.count() + 1
             buddies_amount = buddy_count.count()
+            i['students_amount'] = students_amount
             i['buddies_amount'] = buddies_amount
-
-            other_stud_set = student.arrival_booking.other_students.all()
-            other_stud = ''.join([j.user.user_info.full_name for j in other_stud_set])
-            other_stud_citizenship = ''.join([j.citizenship for j in other_stud_set])
-            if other_stud == '':
-                i['group_full_names'] = f"{student.user.user_info.full_name}"
-                i['group_countries'] = f"{student.citizenship}"
-            else:
-                i['group_full_names'] = f"{student.user.user_info.full_name} {other_stud}"
-                i['group_countries'] = f"{student.citizenship} {other_stud_citizenship}"
 
         return Response(data)
 
@@ -209,24 +201,40 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
         instance = self.get_object()
         student = Student.objects.get(arrival_booking=instance)
         buddy = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=instance)
-        buddy_full_names = [i.user.user_info.full_name for i in buddy if i.user.user_info]
+        buddy_full_names = [i.user.user_info.full_name for i in buddy if buddy and i.user.user_info]
         buddy_id = [i.pk for i in buddy]
         full_name = student.user.user_info.full_name
-        sex = student.user.user_info.sex
+        sex = student.sex
         citizenship = student.citizenship
         contacts = student.user.user_info.contacts
         serializer = self.get_serializer(instance)
         data = serializer.data
-        data['full_name'] = full_name
-        data['sex'] = sex
-        data['citizenship'] = citizenship
-        data['vk'] = contacts.vk
-        data['phone'] = contacts.phone
-        data['telegram'] = contacts.telegram
-        data['whatsapp'] = contacts.whatsapp
+        contacts = {
+            'vk': contacts.vk,
+            'phone': contacts.phone,
+            'telegram': contacts.telegram,
+            'whatsapp': contacts.whatsapp,
+        }
+        user_info = {
+            'full_name': full_name,
+            'birth_date': student.user.user_info.birth_date,
+            'native_language': student.user.user_info.native_language,
+            'other_languages_and_levels': [{'language': i.language, 'level': i.level} for i in student.user.user_info.other_languages_and_levels.all()],
+            'contacts': contacts,
+        }
+        user = {
+            'email': student.user.email,
+            'university': student.user.university,
+            'user_info': user_info
+        }
+        student_data = {
+            'citizenship': citizenship,
+            'sex': sex,
+            'user': user,
+        }
+        data['students'].append(student_data)
         data['buddy_full_names'] = buddy_full_names
         data['buddy_id'] = buddy_id
-
 
         return Response(data)
 
