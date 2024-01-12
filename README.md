@@ -237,28 +237,55 @@ student_id - id студента, к которому добавляем<br>
     {
         "id": 1,
         "arrival_date": "2023-01-01",
-        "buddies_amount": 1,
-        "group_full_names": "test abc",
-        "group_countries": "test test"
+        "arrival_time": "15:00:00",
+        "arrival_point": "1",
+        "students_amount": 2,
+        "buddies_amount": 1
     },
 ]
 ```
 id - id приезда<br>
 arrival_data - дата приезда<br>
+arrival_time - время приезда<br>
+arrival_point - место прибытия<br>
+students_amount - количество студентов на приезде<br>
 buddyies_amount - количество сопровождающих на приезде<br>
-group_full_names - имена всех студентов в приезде<br>
-group_countries - страны всех студентов в приезда<br>
 <b>'api/v1/buddy/arrivals/<int:pk>/'</b> - просмотр конкретного приезда по его id = <int:pk>. GET запрос возвращает:
 ```
 {
     "id": 3,
-    "other_students": [
+    "students": [
         {
             "citizenship": "Kazakhstan",
+            "sex": "male",
             "user": {
+                "email": "test48@test.com",
+                "university": "test",
                 "user_info": {
                     "full_name": "abcde abcde",
-                    "sex": "male",
+                    "birth_date": "1990-01-28",
+                    "native_language": "русский",
+                    "other_languages_and_levels": [],
+                    "contacts": {
+                        "vk": "https://vk.com/ivanov",
+                        "phone": "726789",
+                        "telegram": "@ivanov",
+                        "whatsapp": "+79123456789"
+                    }
+                }
+            }
+        },
+        {
+            "citizenship": "Kazakhstan",
+            "sex": "male",
+            "user": {
+                "email": "test47@test.com",
+                "university": "test",
+                "user_info": {
+                    "full_name": "testtt1",
+                    "birth_date": "1990-01-28",
+                    "native_language": "русский",
+                    "other_languages_and_levels": [],
                     "contacts": {
                         "vk": "https://vk.com/ivanov",
                         "phone": "726789",
@@ -274,13 +301,7 @@ group_countries - страны всех студентов в приезда<br>
     "flight_number": "1",
     "arrival_point": "1",
     "comment": "",
-    "full_name": "testtt1",
-    "sex": "male",
-    "citizenship": "Kazakhstan",
-    "vk": "https://vk.com/ivanov",
-    "phone": "726789",
-    "telegram": "@ivanov",
-    "whatsapp": "+79123456789",
+    "tickets": [],
     "buddy_full_names": [
         "test49"
     ],
@@ -289,10 +310,16 @@ group_countries - страны всех студентов в приезда<br>
     ]
 }
 ```
+id - id приезда<br>
+students - информация о студентах на приезде, аналогична информации из их профилей<br>
+arrival_date - дата прибытия<br>
+arrival_time - время прибытия<br>
+flight_number - номер билета<br>
+arrival_point - место прибытия<br>
+comment - комментарий студента<br>
+tickets - билеты<br>
 buddy_full_names - имена сопровождающих, записанных на приезд<br>
 buddy_id - id сопровождающих, записанных на приезд<br>
-other_students относится к студенту, добавленному как дополнительный участник<br>
-остальный поля относятся к студенту, создающему приезд<br>
 <b>'api/v1/buddy/add-arrival/'</b> - Добавление сопровождающего на приезд. POST запрос в виде:
 ```
 {
