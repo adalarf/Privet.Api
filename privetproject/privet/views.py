@@ -159,9 +159,20 @@ class ArrivalBookingView(RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance)
         data = serializer.data
         student = Student.objects.get(pk=instance)
-        other_students = student.arrival_booking.other_students.all()
+        # if student.arrival_booking.exist():
+        #     if student.arrival_booking.other_students.exists():
+        #         other_students = student.arrival_booking.other_students.all()
+        #
+        #         data['arrival_booking']['other_students'] = [i.user.user_info.full_name for i in other_students]
+        #     else:
+        #         data['arrival_booking']['other_students'] = ''
 
-        data['arrival_booking']['other_students'] = [i.user.user_info.full_name for i in other_students]
+        if student.arrival_booking:
+            if student.arrival_booking.other_students.exists():
+                other_students = student.arrival_booking.other_students.all()
+                data['arrival_booking']['other_students'] = [i.user.user_info.full_name for i in other_students]
+            else:
+                data['arrival_booking']['other_students'] = ''
 
         return Response(data)
 
