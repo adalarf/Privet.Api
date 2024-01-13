@@ -348,63 +348,26 @@ arrival_id - id приезда<br>
 student_id - id студента, который создал приезд<br>
 <b>'api/v1/buddy/buddy-arrivals/<int:user>/'</b> - Вывод всех приездов, на которые записан сопровождающий с id <int:pk>. GET запрос возвращает:
 ```
-{
-    "user": 49,
-    "buddy_arrivals": [
-        {
-            "student": {
-                "citizenship": "Kazakhstan",
-                "user": {
-                    "email": "test47@test.com",
-                    "user_info": {
-                        "full_name": "testtt1",
-                        "sex": "male",
-                        "birth_date": "1990-01-28",
-                        "native_language": "русский",
-                        "other_languages_and_levels": "",
-                        "contacts": {
-                            "vk": "https://vk.com/ivanov",
-                            "phone": "726789",
-                            "telegram": "@ivanov",
-                            "whatsapp": "+79123456789"
-                        }
-                    }
-                },
-                "arrival_booking": {
-                    "id": 3,
-                    "other_students": [
-                        {
-                            "user": {
-                                "email": "test48@test.com",
-                                "user_info": {
-                                    "full_name": "abcde abcde",
-                                    "sex": "male",
-                                    "birth_date": "1990-01-28",
-                                    "native_language": "русский",
-                                    "other_languages_and_levels": "",
-                                    "contacts": {
-                                        "vk": "https://vk.com/ivanov",
-                                        "phone": "726789",
-                                        "telegram": "@ivanov",
-                                        "whatsapp": "+79123456789"
-                                    }
-                                }
-                            },
-                            "citizenship": "Kazakhstan",
-                        }
-                    ],
-                    "arrival_date": "2023-12-16",
-                    "arrival_time": "15:00:00",
-                    "flight_number": "1",
-                    "arrival_point": "1",
-                    "comment": ""
-                }
-            }
-        }
-    ],
-    "buddy_status": "buddy"
-}
+[
+    {
+        "id": 3,
+        "arrival_date": "2023-12-16",
+        "arrival_time": "15:00:00",
+        "arrival_point": "1",
+        "students_amount": 2,
+        "buddies_amount": 1
+    },
+    {
+        "id": 5,
+        "arrival_date": "2024-01-05",
+        "arrival_time": "15:00:00",
+        "arrival_point": "test",
+        "students_amount": 1,
+        "buddies_amount": 1
+    }
+]
 ```
+Поля аналогичны из 'api/v1/buddy/arrivals/'<br>
 <b>'api/v1/buddy/student/<int:pk>/'</b> - Редактирование сопровождающим полей в профиле студента с id <int:pk>. PUT/PATCH запрос в виде:
 ```
 {
