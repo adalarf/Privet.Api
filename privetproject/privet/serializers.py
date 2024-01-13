@@ -339,18 +339,18 @@ class StudentForBuddySerializer(serializers.ModelSerializer):
 
 
 class ArrivalBookingForBuddySerializer(serializers.ModelSerializer):
-    other_students = StudentForBuddySerializer(many=True)
+    #other_students = StudentForBuddySerializer(many=True)
     class Meta:
         model = ArrivalBooking
-        fields = '__all__'
+        fields = ('id', 'arrival_date', 'arrival_time', 'arrival_point',)
 
 
 class StudentArrivalForBuddySerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    # user = UserSerializer()
     arrival_booking = ArrivalBookingForBuddySerializer()
     class Meta:
         model = Student
-        fields = ('citizenship', 'user', 'arrival_booking')
+        fields = ('arrival_booking',)
 
 
 class BuddyArrivalForBuddySerializer(serializers.ModelSerializer):
@@ -365,7 +365,7 @@ class BuddyArrivalsSerializer(serializers.ModelSerializer):
     buddy_arrivals = BuddyArrivalForBuddySerializer(many=True)
     class Meta:
         model = Buddy
-        fields = '__all__'
+        fields = ('buddy_arrivals',)
 
 
 

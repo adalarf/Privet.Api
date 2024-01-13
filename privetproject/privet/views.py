@@ -271,6 +271,31 @@ class BuddyArrivalsView(RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
     lookup_field = 'user'
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        buddy_arrivals = data['buddy_arrivals']
+        res = []
+
+        for i in buddy_arrivals:
+            arrival_booking = i['student']['arrival_booking']
+            student = Student.objects.get(arrival_booking=arrival_booking['id'])
+            buddy_count = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=arrival_booking['id'])
+            students_amount = student.arrival_booking.other_students.count() + 1
+            buddies_amount = buddy_count.count()
+            arrival_info = {
+                'id': arrival_booking['id'],
+                'arrival_date': arrival_booking['arrival_date'],
+                'arrival_time': arrival_booking['arrival_time'],
+                'arrival_point': arrival_booking['arrival_point'],
+                'students_amount': students_amount,
+                'buddies_amount': buddies_amount,
+            }
+            res.append(arrival_info)
+
+        return Response(res)
+
 
 class ArrivalOtherStudentView(APIView):
     permission_classes = [IsAuthenticated & IsStudentUser]
