@@ -178,7 +178,7 @@ Password – текстовое поле<br>
 ```
 <br>
 <h2>Приезды</h2><br>
-<b>'api/v1/student/arrival-booking/<int:pk>/'</b> - Регистрация приезда студентом. PUT/PATCH запрос в виде (При GET запросе возвращает те же данные):
+<b>'api/v1/student/arrival-booking/<int:pk>/'</b> - Регистрация приезда студентом. В случае если студент создает приезд PUT/PATCH запрос в виде (При GET запросе возвращает те же данные):
 
 ```
 {
@@ -221,6 +221,23 @@ flight_number - текстовое поле<br>
 arrival_point - текстовое поле<br>
 comment - текстовое поле<br>
 other_students - id дополнительных участников приезда<br>
+Если студент добавлен на приезд другим студентом, то вывод имеет вид:
+```
+{
+    "arrival_booking": {
+        "id": 2,
+        "tickets": [],
+        "arrival_date": "2023-12-16",
+        "arrival_time": "15:00:00",
+        "flight_number": "1",
+        "arrival_point": "1",
+        "comment": "",
+        "other_students": []
+    },
+    "student_inviter": "abc"
+}
+```
+student_inviter - имя студента, который добавил на приезд<br>
 
 <b>'api/v1/student/arrival-booking/add-student/'</b> - Добавление дополнительных участников приезда. POST запрос в виде:
 ```
