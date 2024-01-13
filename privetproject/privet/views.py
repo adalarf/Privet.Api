@@ -256,8 +256,8 @@ class AddArrivalToBuddy(APIView):
     def post(self, request, *args, **kwargs):
         buddy_id = request.data.get('buddy_id')
         buddy = Buddy.objects.get(pk=buddy_id)
-        student_id = request.data.get('student_id')
-        student = Student.objects.get(pk=student_id)
+        arrival_id = request.data.get('arrival_id')
+        student = Student.objects.get(arrival_booking=arrival_id)
         buddy_arrival = BuddyArrival.objects.create(student=student)
         buddy.buddy_arrivals.add(buddy_arrival)
         buddy.save()
