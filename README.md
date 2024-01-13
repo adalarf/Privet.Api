@@ -341,10 +341,10 @@ buddy_id - id сопровождающих, записанных на приез
 ```
 {
     "buddy_id": "49",
-    "student_id": "47"
+    "arrival_id": "47"
 }
 ```
-buddy_id - id сопровождающего<br>
+arrival_id - id приезда<br>
 student_id - id студента, который создал приезд<br>
 <b>'api/v1/buddy/buddy-arrivals/<int:user>/'</b> - Вывод всех приездов, на которые записан сопровождающий с id <int:pk>. GET запрос возвращает:
 ```
