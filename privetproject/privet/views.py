@@ -309,6 +309,14 @@ class BuddyStudentsView(RetrieveAPIView):
         return Response(students)
 
 
+class CheckStudentArrivalView(APIView):
+    permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
+    def post(self, request, *args, **kwargs):
+        student_id = request.data.get('student_id')
+        student = Student.objects.get(pk=student_id)
+        if student.arrival_booking or Student.objects.filter(arrival_booking__other_students=student):
+            return Response(True)
+        return Response(False)
 
 
 
@@ -415,9 +423,9 @@ class SendEmailView(GenericAPIView):
         user = User.objects.get(email=email)
         if user:
             passcode, created = PassCode.objects.get_or_create(user=user, defaults={
-                'code': secrets.token_hex(3)})
+                'code': secrets.SystemRandom().randint(1000, 9999)})
             if not created:
-                passcode.code = secrets.token_hex(3)
+                passcode.code = secrets.SystemRandom().randint(1000, 9999)
                 passcode.save()
             subject = 'Сброс пароля'
             message = f'Ваш код подтверждения: {passcode.code}'

@@ -118,10 +118,10 @@ class Student(models.Model):
     sex = models.CharField(max_length=255, choices=sex_choices)
     arrival_booking = models.OneToOneField(ArrivalBooking, on_delete=models.PROTECT, null=True)
     only_view = models.OneToOneField('StudentOnlyViewFields', on_delete=models.PROTECT, null=True)
-    confirmation_code = models.CharField(max_length=6, null=True, blank=True)
+    confirmation_code = models.CharField(max_length=4, null=True, blank=True)
 
     def send_confirmation_email(self):
-        code = secrets.token_hex(3)  # Генерация случайного кода из 6 символов
+        code = secrets.SystemRandom().randint(1000, 9999)
         self.confirmation_code = code
         self.save()
         subject = 'Подтверждение регистрации'
