@@ -214,7 +214,7 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
         instance = self.get_object()
         student = Student.objects.get(arrival_booking=instance)
         buddy = Buddy.objects.filter(buddy_arrivals__student__arrival_booking=instance)
-        buddy_full_names = [i.user.user_info.full_name for i in buddy if buddy and i.user.user_info]
+        buddy_full_names = [i.user.user_info.full_name if (buddy and i.user.user_info) else '' for i in buddy]
         buddy_id = [i.pk for i in buddy]
         full_name = student.user.user_info.full_name
         sex = student.sex

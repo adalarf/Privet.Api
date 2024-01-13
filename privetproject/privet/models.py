@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 
 
 class UserInfo(models.Model):
-    full_name = models.CharField(max_length=255, default='')
+    full_name = models.CharField(max_length=255)
     birth_date = models.DateField()
     native_language = models.CharField(max_length=255)
     other_languages_and_levels = models.ManyToManyField('OtherLanguagesAndLevels',
