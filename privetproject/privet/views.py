@@ -158,14 +158,27 @@ class ArrivalBookingView(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
+        invited_student = {}
+
         student = Student.objects.get(pk=instance)
-        # if student.arrival_booking.exist():
-        #     if student.arrival_booking.other_students.exists():
-        #         other_students = student.arrival_booking.other_students.all()
-        #
-        #         data['arrival_booking']['other_students'] = [i.user.user_info.full_name for i in other_students]
-        #     else:
-        #         data['arrival_booking']['other_students'] = ''
+        student_inviter = Student.objects.filter(arrival_booking__other_students=student).first()
+        if student_inviter:
+            student_inviter_arrival = student_inviter.arrival_booking
+            invited_student['arrival_booking'] = {
+                'id': student_inviter.arrival_booking.id,
+                'tickets': [i.file for i in student_inviter_arrival.tickets.all()],
+                'arrival_date': student_inviter_arrival.arrival_date,
+                'arrival_time': student_inviter_arrival.arrival_time,
+                'flight_number': student_inviter_arrival.flight_number,
+                'arrival_point': student_inviter_arrival.arrival_point,
+                'comment': student_inviter_arrival.comment,
+                'other_students': [i.user.user_info.full_name for i in
+                                   student_inviter_arrival.other_students.exclude(pk=student.pk)]
+            }
+            # data['arrival_booking']['other_students'].append(student_inviter.user.user_info.full_name)
+            invited_student['student_inviter'] = student_inviter.user.user_info.full_name
+
+            return Response(invited_student)
 
         if student.arrival_booking:
             if student.arrival_booking.other_students.exists():
