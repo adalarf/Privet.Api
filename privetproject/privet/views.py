@@ -5,7 +5,7 @@ from .serializers import StudentSerializer, BuddySerializer, StudentSignupSerial
     BuddySignupSerializer, BaseUserSerializer, StudentArrivalBookingSerializer,\
     ArrivalBookingSerializer, BuddyArrivalsSerializer, ArrivalOtherStudentSerializer, \
     ArrivalBookingInfoSerializer, DefiniteArrivalBookingSerializer, StudentOnlyViewFieldsSerializer,\
-    BuddyStudentsSerializer, AddBuddyToArrivalSerializer
+    BuddyStudentsSerializer, AddBuddyToArrivalSerializer, AllBuddysSerializer
 from rest_framework.permissions import IsAuthenticated
 from .models import Student, Buddy, ArrivalBooking, BuddyArrival, PassCode
 from .permissions import IsStudentUser, IsBuddyUser, IsConfirmedBuddyUser, IsConfirmedBuddyArrivalUser, IsTeamleadUser
@@ -416,6 +416,18 @@ class ConfirmBuddyView(APIView):
         return Response(f"Buddy with {buddy_id} id is confirmed", status=status.HTTP_201_CREATED)
 
 
+
+class AllBuddysView(APIView):
+    permission_classes = [IsAuthenticated & IsTeamleadUser]
+    def get(self, request, *args, **kwargs):
+        buddys = Buddy.objects.filter(buddy_status=True)
+        serializer = AllBuddysSerializer(buddys, many=True)
+        data = serializer.data
+
+        for i in data:
+            buddy = Buddy.objects.get(pk=i['user']['id'])
+            i['arrival_count'] = buddy.buddy_arrivals.filter(buddy_arrival_status=True).count()
+        return Response(data)
 
 
 

@@ -421,6 +421,24 @@ class AddBuddyToArrivalSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserInfoForAllBuddysSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInfo
+        fields = ('full_name',)
+
+class UserForAllBuddysSerializer(serializers.ModelSerializer):
+    user_info = UserInfoForAllBuddysSerializer()
+    class Meta:
+        model = User
+        fields = ('id', 'user_info',)
+
+class AllBuddysSerializer(serializers.ModelSerializer):
+    user = UserForAllBuddysSerializer()
+    class Meta:
+        model = Buddy
+        fields = ('user',)
+
+
 
 class BuddySerializer(serializers.ModelSerializer):
     user = UserSerializer()
