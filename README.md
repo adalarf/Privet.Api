@@ -472,14 +472,12 @@ buddy_arrival_id - id приезда<br>
 }
 ```
 buddy_id - id сопровождаюшего, статус которого подтверждаем<br>
-<b>'api/v1/teamlead/confirm-buddy-arrival/'</b> - Подтверждение тимлидом приезда отдельного сопровождающего. POST запрос в виде:
+<b>'api/v1/teamlead/confirm-buddy-arrival/'</b> - Подтверждение тимлидом приезда. POST запрос в виде:
 ```
 {
-    "buddy_id": "1",
-    "arrival_id": "1"
+    "arrival_id": "6"
 }
 ```
-buddy_id - id сопровождающего<br>
 arrival_id - id приезда<br>
 <b>'api/v1/teamlead/all-buddys/'</b> - Просмотр тимлидом всех подтвержденных сопровождающих. GET запрос выдает ответ в виде:
 ```
