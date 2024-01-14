@@ -151,7 +151,9 @@ class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
             'full_name': user_info.full_name,
             'birth_date': user_info.birth_date,
             'native_language': user_info.native_language,
-            'other_languages_and_levels': [i.other_language_and_level for i in user_info.other_languages_and_levels.all()],
+            #'other_languages_and_levels': [i.other_language_and_level for i in user_info.other_languages_and_levels.all()],
+            'other_language_and_levels': [{'language': i.language, 'level': i.level} for i in
+             user_info.other_languages_and_levels.all()],
             'contacts': contacts,
         }
 
