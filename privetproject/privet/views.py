@@ -114,6 +114,18 @@ class StudentProfileForBuddyView(RetrieveUpdateDestroyAPIView):
             'user_info': user_info,
         }
         data['user'] = user_data
+        if BuddyArrival.objects.filter(student=student):
+            buddy = Buddy.objects.filter(buddy_arrivals__student=student).last()
+            data['last_buddy'] = buddy.user.user_info.full_name
+            data['last_arrival_date'] = student.arrival_booking.arrival_date
+        elif BuddyArrival.objects.filter(student__arrival_booking__other_students=student):
+            buddy = Buddy.objects.filter(buddy_arrivals__student__arrival_booking__other_students=student).last()
+            data['last_buddy'] = buddy.user.user_info.full_name
+            arrival_booking = ArrivalBooking.objects.filter(other_students=student).first()
+            data['last_arrival_date'] = arrival_booking.arrival_date
+        else:
+            data['last_buddy'] = ''
+            data['last_arrival_date'] = ''
 
         return Response(data)
 
