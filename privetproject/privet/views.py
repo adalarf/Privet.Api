@@ -408,14 +408,12 @@ class DeleteBuddyArrivalView(APIView):
 class ConfirmBuddyArrivalView(APIView):
     permission_classes = [IsAuthenticated & IsTeamleadUser]
     def post(self, request):
-        buddy_id = request.data.get('buddy_id')
         arrival_id = request.data.get('arrival_id')
-        buddy = Buddy.objects.get(pk=buddy_id)
         arrival = ArrivalBooking.objects.get(pk=arrival_id)
-        buddy_arrival = buddy.buddy_arrivals.get(student__arrival_booking=arrival)
-        buddy_arrival.buddy_arrival_status = True
-        buddy_arrival.save()
-        return Response(f'Сопровождающий {buddy_id} подтвержден')
+        buddy_arrivals = BuddyArrival.objects.filter(student__arrival_booking=arrival)
+        buddy_arrivals.update(buddy_arrival_status=True)
+
+        return Response(f'Приезд {arrival_id} утвержден')
 
 
 class ConfirmBuddyView(APIView):
