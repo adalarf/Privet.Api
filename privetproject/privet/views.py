@@ -443,6 +443,16 @@ class AllBuddysView(APIView):
 
 
 
+class AllNotConfirmedBuddysView(APIView):
+    permission_classes = [IsAuthenticated & IsTeamleadUser]
+    def get(self, request, *args, **kwargs):
+        buddys = Buddy.objects.filter(buddy_status=False)
+        serializer = AllBuddysSerializer(buddys, many=True)
+        data = serializer.data
+
+        return Response(data)
+
+
 class StudentSignupView(GenericAPIView):
     serializer_class = StudentSignupSerializer
 
