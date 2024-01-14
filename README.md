@@ -415,7 +415,9 @@ GET запрос выдает ответ в виде:
                 "whatsapp": "+79123456789"
             }
         }
-    }
+    },
+    "last_buddy": "",
+    "last_arrival_date": ""
 }
 ```
 <b>'api/v1/buddy/buddy-students/<int:pk>/'</b> - Список всех студентов сопровождающего. GET запрос возвращает:
