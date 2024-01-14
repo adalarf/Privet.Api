@@ -235,7 +235,7 @@ class OtherStudentsArrivalSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Student
-        fields = ('citizenship', 'sex', 'user')
+        fields = ('pk', 'citizenship', 'sex', 'user')
 
 
 class DefiniteArrivalBookingSerializer(serializers.ModelSerializer):

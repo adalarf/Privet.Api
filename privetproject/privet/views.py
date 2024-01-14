@@ -17,6 +17,8 @@ from .authtoken import ObtainAuthToken
 import secrets
 from django.core.mail import send_mail
 from django.conf import settings
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 class StudentProfileView(RetrieveUpdateDestroyAPIView):
@@ -241,6 +243,7 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
             'user_info': user_info
         }
         student_data = {
+            'id': student.pk,
             'citizenship': citizenship,
             'sex': sex,
             'user': user,
@@ -249,7 +252,9 @@ class DefiniteArrivalBookingView(RetrieveAPIView):
         data['buddy_full_names'] = buddy_full_names
         data['buddy_id'] = buddy_id
 
-        return Response(data)
+        data = json.dumps(data, cls=DjangoJSONEncoder).replace('"pk":', '"id":')
+
+        return Response(json.loads(data))
 
 class AddArrivalToBuddy(APIView):
     permission_classes = [IsAuthenticated, IsConfirmedBuddyUser]
