@@ -273,6 +273,7 @@ buddyies_amount - количество сопровождающих на при�
     "id": 3,
     "students": [
         {
+            "id": 48,
             "citizenship": "Kazakhstan",
             "sex": "male",
             "user": {
@@ -293,6 +294,7 @@ buddyies_amount - количество сопровождающих на при�
             }
         },
         {
+            "id": 47,
             "citizenship": "Kazakhstan",
             "sex": "male",
             "user": {
